@@ -1,3 +1,4 @@
 <Solution>
+  <Project Path="AppHost/AppHost.csproj" />
   <Project Path="Wiki/Wiki.csproj" />
 </Solution>
