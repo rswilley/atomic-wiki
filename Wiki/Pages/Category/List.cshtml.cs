@@ -1,9 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace Wiki.Pages;
+namespace Wiki.Pages.Category;
 
-public class CategoryModel : PageModel
+public class CategoryListModel : PageModel
 {
     [FromRoute]
     public string Slug { get; set; } = "";
