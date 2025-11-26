@@ -1,12 +1,13 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Wiki.Data;
 
 namespace Wiki.Pages;
 
-public class ComposeModel : PageModel
+public class ComposeModel(AtomicWikiDbContext db) : PageModel
 {
-    private static readonly string[] AllowedTypes = { "note", "post", "journal" };
+    private static readonly string[] AllowedTypes = ["note", "post", "journal"];
 
     [BindProperty]
     [Required]
@@ -32,7 +33,7 @@ public class ComposeModel : PageModel
 
     [BindProperty]
     [Required]
-    public string Content { get; set; } = "";
+    public string Content { get; set; } = "# Untitled";
 
     [BindProperty]
     [StringLength(100)]
@@ -65,7 +66,7 @@ public class ComposeModel : PageModel
         }
     }
 
-    public IActionResult OnPost()
+    public async Task<IActionResult> OnPostAsync()
     {
         // Normalize type
         if (!AllowedTypes.Contains(Type?.ToLowerInvariant() ?? ""))
@@ -92,34 +93,28 @@ public class ComposeModel : PageModel
             return Page();
         }
 
-        // TODO: map this to your Page entity and persist (EF/SQLite)
-        // Pseudo-code:
-        /*
-    var page = new Page
-    {
-        Title = Title,
-        Slug = SlugGenerator.FromTitle(Title),
-        Content = Content,
-        Type = Type, // "note", "post", or "journal"
-        CreatedAt = DateTime.UtcNow,
-        UpdatedAt = DateTime.UtcNow,
-        IsPinned = Type == "journal" ? false : IsPinned,
-        Summary = Summary,
-        Category = Category,
-        Tags = ParseTags(Tags)
-    };
+        // var page = new Models.Page
+        // {
+        //     Title = Title,
+        //     Slug = SlugGenerator.FromTitle(Title),
+        //     Content = Content,
+        //     Type = Type, // "note", "post", or "journal"
+        //     CreatedAt = DateTime.UtcNow,
+        //     UpdatedAt = DateTime.UtcNow,
+        //     IsPinned = Type != "journal" && IsPinned,
+        //     Summary = Summary,
+        //     Category = Category,
+        //     Tags = ParseTags(Tags)
+        // };
 
-    if (Type == "journal")
-    {
-        page.JournalDate = JournalDate.Value;
-        page.JournalTime = JournalTime;
-    }
-
-    _db.Pages.Add(page);
-    await _db.SaveChangesAsync();
-    */
-
-        // For now, just redirect somewhere; later redirect to the created page
+        // if (Type == "journal")
+        // {
+        //     page.JournalDate = JournalDate.Value;
+        //     page.JournalTime = JournalTime;
+        // }
+        //
+        // db.Pages.Add(page);
+        // await db.SaveChangesAsync();
         return RedirectToPage("/Index");
     }
 }

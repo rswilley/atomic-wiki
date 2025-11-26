@@ -12,6 +12,7 @@ public class AtomicWikiDbContext : DbContext
 
     public DbSet<Page> Pages => Set<Page>();
     public DbSet<PageTag> Tags => Set<PageTag>();
+    public DbSet<PageCategory> Categories => Set<PageCategory>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -25,6 +26,18 @@ public class AtomicWikiDbContext : DbContext
         modelBuilder.Entity<PageTag>()
             .HasIndex(t => t.ExternalId)
             .IsUnique();
+        
+        // Category
+        modelBuilder.Entity<PageCategory>()
+            .HasIndex(c => c.ExternalId)
+            .IsUnique();
+
+        // One-to-many Category -> Pages
+        modelBuilder.Entity<Page>()
+            .HasOne(p => p.Category)
+            .WithMany(c => c.Pages)
+            .HasForeignKey(p => p.CategoryId)
+            .OnDelete(DeleteBehavior.SetNull); // When category deleted, keep pages but null out CategoryId
 
         // Many-to-many Page <-> Tag
         modelBuilder.Entity<Page>()
