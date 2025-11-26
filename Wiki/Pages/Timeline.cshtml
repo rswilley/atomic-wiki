@@ -1,0 +1,163 @@
+﻿@page
+@model TimelineModel
+@{
+    ViewData["Title"] = "Timeline";
+}
+
+@section Styles {
+    <style>
+        .atomic-timeline {
+            position: relative;
+        }
+
+        /* The little dot and line in the date column (desktop) */
+        .timeline-date {
+            position: relative;
+            padding-left: 0.75rem;
+        }
+
+        .timeline-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            border: 2px solid #6c757d;
+            background-color: #fff;
+            position: relative;
+            margin-bottom: 0.25rem;
+        }
+
+        @@media (min-width: 768px) {
+            .timeline-date {
+                border-right: 1px solid rgba(0, 0, 0, 0.08);
+                margin-right: 0.5rem;
+            }
+        }
+
+        .timeline-date::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            right: -1px;
+            width: 1px;
+            background-color: rgba(0, 0, 0, 0.08);
+        }
+
+        .timeline-dot {
+            position: absolute;
+            right: -6px; /* half of width + border to center on line */
+            top: 0.4rem;
+            background-color: #fff;
+        }
+
+        /* Timeline items */
+        .timeline-item {
+            border-left: 3px solid transparent;
+        }
+
+        .timeline-item:hover {
+            border-left-color: #0d6efd;
+        }
+    </style>
+}
+
+<h1 class="h4 mb-3">Timeline</h1>
+
+<!-- Filters / controls -->
+<section class="mb-3">
+    <div class="row g-2 align-items-end">
+        <div class="col-12 col-md-4">
+            <label class="form-label small text-muted">Search</label>
+            <form method="get" class="d-flex gap-2">
+                <input name="q" value="@Model.Query" class="form-control form-control-sm" placeholder="Search timeline..." />
+                <button type="submit" class="btn btn-sm btn-outline-secondary">Go</button>
+            </form>
+        </div>
+
+        <div class="col-6 col-md-3">
+            <label class="form-label small text-muted">Type</label>
+            <select name="type" class="form-select form-select-sm" form="">
+                <option value="">All</option>
+                <option value="note">Notes</option>
+                <option value="post">Posts</option>
+                <option value="journal">Journal</option>
+            </select>
+        </div>
+
+        <div class="col-6 col-md-3">
+            <label class="form-label small text-muted">Sort</label>
+            <select name="order" class="form-select form-select-sm" form="">
+                <option value="desc">Newest first</option>
+                <option value="asc">Oldest first</option>
+            </select>
+        </div>
+    </div>
+</section>
+
+<!-- Timeline -->
+<section class="atomic-timeline">
+    @if (Model.Groups.Any())
+    {
+        @foreach (var group in Model.Groups)
+        {
+            <div class="timeline-group row g-0 mb-4">
+                <!-- Date column -->
+                <div class="col-12 col-md-3 col-lg-2 mb-1 mb-md-0">
+                    <div class="timeline-date text-muted small d-flex d-md-block align-items-center gap-2">
+                        <div class="timeline-dot d-none d-md-inline-block"></div>
+                        <div>
+                            <div class="fw-semibold">@group.Date.ToString("yyyy-MM-dd")</div>
+                            <div class="small text-muted">
+                                @group.Date.ToString("dddd")
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Items column -->
+                <div class="col-12 col-md-9 col-lg-10">
+                    <div class="timeline-items">
+                        @foreach (var item in group.Items)
+                        {
+                            <article class="card card-body py-2 px-3 mb-2 timeline-item">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <a asp-page="/Page" asp-route-slug="@item.Slug" class="fw-semibold">
+                                            @item.Title
+                                        </a>
+                                        <div class="small text-muted">
+                                            @item.Time?.ToString(@"hh\:mm") ?? "--:--"
+                                            &nbsp;•&nbsp; @item.Type
+                                            @if (item.Tags?.Any() == true)
+                                            {
+                                                <span> • tags:
+                                                    @string.Join(", ", item.Tags)
+                                                </span>
+                                            }
+                                        </div>
+                                    </div>
+
+                                    @if (item.IsPinned)
+                                    {
+                                        <span class="badge bg-warning text-dark ms-2 small">Pinned</span>
+                                    }
+                                </div>
+
+                                @if (!string.IsNullOrWhiteSpace(item.Summary))
+                                {
+                                    <p class="small mb-0 mt-1 text-muted">
+                                        @item.Summary
+                                    </p>
+                                }
+                            </article>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+    }
+    else
+    {
+        <p class="text-muted small">No entries found yet. Start by creating a <a asp-page="/NewNote">new note</a>.</p>
+    }
+</section>
