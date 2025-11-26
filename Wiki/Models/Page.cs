@@ -30,7 +30,11 @@ public class Page
     public string Content { get; set; } = "";
     public string RenderedContent { get; set; } = "";
     
-    public int? CategoryId { get; set; }
+    // Foreign key
+    public int? CategoryId { get; set; }   // nullable = page can have no category
+
+    // Navigation property
+    public PageCategory? Category { get; set; }
 
     public bool IsPinned { get; set; }
 
@@ -43,18 +47,4 @@ public class Page
     
     public Guid ExternalId { get; set; } = Guid.NewGuid();
     public ICollection<PageTag> Tags { get; set; } = new List<PageTag>();
-}
-
-public class PageTag
-{
-    public int Id { get; set; }
-
-    [Required, MaxLength(100)]
-    public string Name { get; set; } = "";
-
-    [Required, MaxLength(100)]
-    public string Slug { get; set; } = "";
-
-    public Guid ExternalId { get; set; } = Guid.NewGuid();
-    public ICollection<Page> Pages { get; set; } = new List<Page>();
 }

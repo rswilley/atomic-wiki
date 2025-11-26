@@ -10,6 +10,12 @@
             min-width: 4.5rem;
         }
     </style>
+    <link
+        rel="stylesheet"
+        type="text/css"
+        href="https://unpkg.com/tiny-markdown-editor/dist/tiny-mde.min.css"
+    />
+    <script src="https://unpkg.com/tiny-markdown-editor/dist/tiny-mde.min.js"></script>
 }
 
 <h1 class="h4 mb-3">Compose</h1>
@@ -69,8 +75,11 @@
             <!-- Content -->
             <div class="mb-3">
                 <label class="form-label">Content</label>
-                <textarea asp-for="Content" class="form-control" rows="10"
-                          placeholder="Write your note, post, or journal entry here... (Markdown supported)"></textarea>
+                <div id="toolbar"></div>
+                <textarea asp-for="Content" class="form-control" rows="10"></textarea>
+                <script type="text/javascript">
+                  var tinyMDE = new TinyMDE.Editor({ textarea: "Content" });
+                </script>
                 <span class="text-danger small" asp-validation-for="Content"></span>
             </div>
         </div>
