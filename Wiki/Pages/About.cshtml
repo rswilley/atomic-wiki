@@ -1,0 +1,179 @@
+﻿@page
+@model AboutModel
+@{
+    ViewData["Title"] = "About Atomic Wiki";
+}
+
+<div class="row g-4">
+    <div class="col-12 col-lg-8">
+        <header class="mb-3">
+            <h1 class="h4 mb-1">About Atomic Wiki</h1>
+            <p class="text-muted small mb-0">
+                A local-first, single-user wiki for building a personal knowledge system from small, connected pieces.
+            </p>
+        </header>
+
+        <section class="mb-4">
+            <h2 class="h5">Why Atomic Wiki?</h2>
+            <p>
+                Atomic Wiki is a private, local-only space for your ideas, experiments, and reference material.
+                It takes inspiration from personal wikis, blogs, and “second brain” systems, but keeps everything
+                on your machine, under your control.
+            </p>
+            <p>
+                The core idea is simple:
+                instead of giant, messy documents, you create lots of small, focused pages
+                that link together. Over time, those little pieces add up to a powerful
+                personal knowledge base.
+            </p>
+        </section>
+
+        <section class="mb-4">
+            <h2 class="h5">The philosophy of atomic notes</h2>
+            <p>
+                An <strong>atomic note</strong> is a small, self-contained piece of knowledge that captures one idea
+                and can stand on its own. It’s not meant to be a full book chapter or a dumping ground of everything
+                you know. It’s closer to a single building block.
+            </p>
+            <ul>
+                <li>Each note has <strong>one main idea</strong>.</li>
+                <li>Notes are <strong>evergreen</strong> – you refine them over time as your understanding improves.</li>
+                <li>Notes <strong>link to other notes</strong>, forming a graph instead of a strict hierarchy.</li>
+                <li>Notes are <strong>short enough to re-read quickly</strong> and update when needed.</li>
+            </ul>
+            <p>
+                This makes it easy to add a little bit at a time:
+                you don’t need a huge block of free time to “organize your life” –
+                you just create or refine one atomic note whenever something matters.
+            </p>
+        </section>
+
+        <section class="mb-4">
+            <h2 class="h5">Three types of pages</h2>
+            <p class="mb-2">
+                Atomic Wiki uses three simple page types. Technically they’re all just
+                pages with a different <code>Type</code> value, but they have different purposes:
+            </p>
+
+            <h3 class="h6 mt-3">1. Note – evergreen knowledge</h3>
+            <p>
+                A <strong>note</strong> stores knowledge you want to keep and improve over time.
+                It’s the core “atomic” unit of your wiki.
+            </p>
+            <ul>
+                <li>Not tied to a specific day.</li>
+                <li>Meant to be updated, refactored, and linked.</li>
+                <li>Great for patterns, reference material, how-tos, design decisions, and concepts.</li>
+            </ul>
+            <p class="small text-muted mb-2">
+                Examples: “Orleans concurrency patterns”, “AI visual workflow for techno mixes”,
+                “Atomic Wiki architecture”.
+            </p>
+
+            <h3 class="h6 mt-3">2. Post – a private article or story</h3>
+            <p>
+                A <strong>post</strong> is a more polished, narrative piece of writing.
+                Think “blog post”, but private and local.
+            </p>
+            <ul>
+                <li>Has a date, but isn’t just a log line.</li>
+                <li>Often tells a story, explains a decision, or walks through an experience.</li>
+                <li>Less evergreen than a note, more structured than a journal entry.</li>
+            </ul>
+            <p class="small text-muted mb-2">
+                Examples: “Why I’m building Atomic Wiki”, “The story behind the floating island animation”,
+                “My Tesla charging routine and why it works”.
+            </p>
+
+            <h3 class="h6 mt-3">3. Journal entry – time-based log</h3>
+            <p>
+                A <strong>journal entry</strong> is a snapshot of a moment in time.
+                It’s meant to be quick, honest, and time-stamped.
+            </p>
+            <ul>
+                <li>Always tied to a specific <strong>date</strong> (and optionally time).</li>
+                <li>Great for daily logs, small wins, frustrations, or experiments.</li>
+                <li>You don’t polish these much; you just capture what happened.</li>
+            </ul>
+            <p class="small text-muted mb-2">
+                Examples: “2025-03-01 – Late night mix session”, “AI visuals experiment log”, “Tesla charging log”.
+            </p>
+        </section>
+
+        <section class="mb-4">
+            <h2 class="h5">How they work together</h2>
+            <p>
+                All three types are stored as pages in the same system. They share the same building blocks:
+                title, content, tags, category, and timestamps. The only difference is how you <em>use</em> them.
+            </p>
+            <ul>
+                <li><strong>Journal entries</strong> capture what happened.</li>
+                <li><strong>Posts</strong> tell the story of what you learned or decided.</li>
+                <li><strong>Notes</strong> distill that learning into reusable, evergreen knowledge.</li>
+            </ul>
+            <p>
+                A typical flow looks like this:
+            </p>
+            <ol>
+                <li>You try something and jot it down as a <strong>journal entry</strong>.</li>
+                <li>Once it sticks, you write a <strong>post</strong> about what worked and why.</li>
+                <li>Then you extract the core ideas into one or more <strong>atomic notes</strong>.</li>
+            </ol>
+        </section>
+
+        <section class="mb-4">
+            <h2 class="h5">Local-first and private by design</h2>
+            <p>
+                Atomic Wiki is designed to run on <strong>localhost</strong> with no external dependencies:
+            </p>
+            <ul>
+                <li>No external analytics or tracking scripts.</li>
+                <li>No CDNs required; everything can be served from local files.</li>
+                <li>Your content lives in a single database or folder on your machine.</li>
+            </ul>
+            <p>
+                It’s your knowledge, your ideas, your experiments – and they stay on your machine.
+            </p>
+        </section>
+
+        <section class="mb-4">
+            <h2 class="h5">How to get started</h2>
+            <ul>
+                <li>Create a few <strong>notes</strong> for the topics you care about the most.</li>
+                <li>Use <strong>journal entries</strong> as a daily or weekly log of what you’re doing.</li>
+                <li>When something feels important, write a <strong>post</strong> to explain it to yourself.</li>
+                <li>Link related pages together with internal links and tags.</li>
+            </ul>
+            <p>
+                Over time, you’ll end up with a personal knowledge system that reflects how <em>you</em> think,
+                not how a tool thinks you should.
+            </p>
+        </section>
+    </div>
+
+    <!-- Optional side column for quick links/stats -->
+    <div class="col-12 col-lg-4">
+        <aside class="card">
+            <div class="card-body py-3 px-3">
+                <h2 class="h6 mb-2">Quick links</h2>
+                <ul class="list-unstyled small mb-3">
+                    <li><a asp-page="/Compose" asp-route-type="note">New note</a></li>
+                    <li><a asp-page="/Compose" asp-route-type="journal">New journal entry</a></li>
+                    <li><a asp-page="/Compose" asp-route-type="post">New post</a></li>
+                    <li><a asp-page="/Notes">Browse notes</a></li>
+                    <li><a asp-page="/Timeline">View timeline</a></li>
+                </ul>
+
+                <h2 class="h6 mb-2">Mental model</h2>
+                <p class="small text-muted mb-1">
+                    Notes = evergreen knowledge<br />
+                    Posts = stories and essays<br />
+                    Journal = time-stamped logs
+                </p>
+                <p class="small text-muted mb-0">
+                    All three live side by side, and all three are yours.
+                </p>
+            </div>
+        </aside>
+    </div>
+</div>
