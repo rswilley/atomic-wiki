@@ -1,7 +1,18 @@
+using Microsoft.EntityFrameworkCore;
+using Wiki.Data;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorPages();
+
+// EF Core + SQLite
+var dataDirectory = builder.Configuration.GetValue<string>("DATA_DIRECTORY");
+ArgumentException.ThrowIfNullOrEmpty(dataDirectory);
+var connectionString = $"Data Source={Path.Combine(dataDirectory, "atomicwiki.db")}";
+
+builder.Services.AddDbContext<AtomicWikiDbContext>(options =>
+    options.UseSqlite(connectionString));
 
 var app = builder.Build();
 
