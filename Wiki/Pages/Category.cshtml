@@ -1,0 +1,147 @@
+﻿@page "{slug}"
+@model CategoryModel
+@{
+    ViewData["Title"] = $"Category: {Model.CategoryName}";
+}
+
+@section Styles {
+    <style>
+        .category-item-card {
+            border-left: 3px solid transparent;
+            transition: box-shadow 0.15s ease, transform 0.15s ease, border-left-color 0.15s ease;
+        }
+
+        .category-item-card:hover {
+            border-left-color: #0d6efd;
+            box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.06);
+            transform: translateY(-2px);
+        }
+    </style>
+}
+
+<h1 class="h4 mb-1">@Model.CategoryName</h1>
+
+@if (!string.IsNullOrWhiteSpace(Model.Description))
+{
+    <p class="text-muted small mb-3">
+        @Model.Description
+    </p>
+}
+else
+{
+    <p class="text-muted small mb-3">
+        Showing all items in this category.
+    </p>
+}
+
+<!-- Filters / controls -->
+<section class="mb-3">
+    <form method="get" class="row g-2 align-items-end">
+        <input type="hidden" name="slug" value="@Model.Slug" />
+
+        <div class="col-12 col-md-4">
+            <label class="form-label small text-muted">Search within category</label>
+            <input name="q"
+                   value="@Model.Query"
+                   class="form-control form-control-sm"
+                   placeholder="Search..." />
+        </div>
+
+        <div class="col-6 col-md-3">
+            <label class="form-label small text-muted">Type</label>
+            <select name="type"
+                    class="form-select form-select-sm">
+                <option value="">All types</option>
+                <option value="note" selected="@("note".Equals(Model.TypeFilter, StringComparison.OrdinalIgnoreCase))">
+                    Notes
+                </option>
+                <option value="post" selected="@("post".Equals(Model.TypeFilter, StringComparison.OrdinalIgnoreCase))">
+                    Posts
+                </option>
+                <option value="journal" selected="@("journal".Equals(Model.TypeFilter, StringComparison.OrdinalIgnoreCase))">
+                    Journal
+                </option>
+            </select>
+        </div>
+
+        <div class="col-6 col-md-3">
+            <label class="form-label small text-muted">Order</label>
+            <select name="order"
+                    class="form-select form-select-sm">
+                <option value="desc" selected="@("desc".Equals(Model.Order, StringComparison.OrdinalIgnoreCase))">
+                    Newest first
+                </option>
+                <option value="asc" selected="@("asc".Equals(Model.Order, StringComparison.OrdinalIgnoreCase))">
+                    Oldest first
+                </option>
+            </select>
+        </div>
+
+        <div class="col-12 col-md-2 d-grid">
+            <button type="submit" class="btn btn-sm btn-outline-secondary">
+                Apply
+            </button>
+        </div>
+    </form>
+</section>
+
+<!-- Items grid -->
+<section>
+    @if (Model.Items.Any())
+    {
+        <div class="row g-3">
+            @foreach (var item in Model.Items)
+            {
+                <!-- Mobile: 1 column; md+: 2 columns; lg+: 3 columns -->
+                <div class="col-12 col-md-6 col-lg-4">
+                    <article class="card category-item-card h-100">
+                        <div class="card-body py-2 px-3 d-flex flex-column">
+                            <div class="d-flex justify-content-between align-items-start mb-1">
+                                <div class="small text-muted">
+                                    @item.DisplayDate
+                                </div>
+
+                                <span class="badge bg-light text-dark border small text-uppercase">
+                                    @item.Type
+                                </span>
+                            </div>
+
+                            <h2 class="h6 mb-1">
+                                <a asp-page="/Page"
+                                   asp-route-slug="@item.Slug"
+                                   class="stretched-link text-decoration-none">
+                                    @item.Title
+                                </a>
+                            </h2>
+
+                            @if (!string.IsNullOrWhiteSpace(item.Summary))
+                            {
+                                <p class="small text-muted mb-2">
+                                    @item.Summary
+                                </p>
+                            }
+
+                            @if (item.Tags?.Any() == true)
+                            {
+                                <div class="mt-auto pt-1">
+                                    <div class="d-flex flex-wrap gap-1 small">
+                                        @foreach (var tag in item.Tags)
+                                        {
+                                            <span class="badge bg-light text-dark border">@tag</span>
+                                        }
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </article>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <p class="text-muted small">
+            No items found in this category with the current filters.
+        </p>
+    }
+</section>
