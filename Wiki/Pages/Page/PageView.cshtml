@@ -1,0 +1,222 @@
+﻿@page "/page/{slug}"
+@model PageViewModel
+@{
+    ViewData["Title"] = Model.Title ?? "Page";
+}
+
+@section Styles {
+    <style>
+        .page-content {
+            line-height: 1.6;
+            font-size: 0.95rem;
+        }
+
+        .page-content h1,
+        .page-content h2,
+        .page-content h3 {
+            margin-top: 1.25rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .page-content p {
+            margin-bottom: 0.5rem;
+        }
+
+        .page-sidebar {
+            position: sticky;
+            top: 3.5rem; /* just below topbar */
+        }
+
+        @@media (max-width: 991.98px) {
+            .page-sidebar {
+                position: static;
+                top: auto;
+            }
+    }
+    </style>
+}
+
+@if (Model.NotFound)
+{
+    <h1 class="h4 mb-2">Not found</h1>
+    <p class="text-muted small">
+        This page doesn’t exist yet.
+        You can <a asp-page="/Compose" asp-route-type="note">create a new note</a> with this title.
+    </p>
+}
+else
+{
+    <div class="row g-3">
+        <!-- Main content -->
+        <div class="col-12 col-lg-8">
+            <!-- Title + type + journal date -->
+            <header class="mb-2">
+                <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
+                    <h1 class="h4 mb-0">@Model.Title</h1>
+
+                    <span class="badge bg-light text-dark border text-uppercase small">
+                        @Model.Type
+                    </span>
+
+                    @if (Model.IsPinned)
+                    {
+                        <span class="badge bg-warning text-dark small">
+                            Pinned
+                        </span>
+                    }
+                </div>
+
+                <div class="small text-muted">
+                    @if (Model.Type == "journal" && Model.JournalDate.HasValue)
+                    {
+                        <span>
+                            @Model.JournalDate.Value.ToString("yyyy-MM-dd")
+                            @if (Model.JournalTime.HasValue)
+                            {
+                                <span>@Model.JournalTime.Value.ToString(@"hh\:mm")</span>
+                            }
+                            • Journal entry
+                        </span>
+                    }
+                    else
+                    {
+                        <span>
+                            Created @Model.CreatedAt?.ToString("yyyy-MM-dd") •
+                            Updated @Model.UpdatedAt?.ToString("yyyy-MM-dd")
+                        </span>
+                    }
+
+                    @if (!string.IsNullOrWhiteSpace(Model.Category))
+                    {
+                        <span>
+                            • Category:
+                            <a asp-page="/Category" asp-route-slug="@Model.CategorySlug">
+                                @Model.Category
+                            </a>
+                        </span>
+                    }
+                </div>
+            </header>
+
+            @* Optional summary *@
+            @if (!string.IsNullOrWhiteSpace(Model.Summary))
+            {
+                <p class="lead fs-6 text-muted">
+                    @Model.Summary
+                </p>
+            }
+
+            <hr class="my-3" />
+
+            <!-- Content (Markdown-rendered HTML) -->
+            <article class="page-content">
+                @if (!string.IsNullOrWhiteSpace(Model.RenderedContent))
+                {
+                    @Html.Raw(Model.RenderedContent)
+                }
+                else
+                {
+                    <p class="text-muted small">
+                        No content yet.
+                    </p>
+                }
+            </article>
+        </div>
+
+        <!-- Sidebar / metadata -->
+        <div class="col-12 col-lg-4">
+            <aside class="page-sidebar">
+                <div class="card mb-3">
+                    <div class="card-body py-2 px-3">
+                        <h2 class="h6 mb-2">Details</h2>
+
+                        <dl class="row small mb-0">
+                            <dt class="col-4 text-muted">Type</dt>
+                            <dd class="col-8 text-capitalize">@Model.Type</dd>
+
+                            @if (Model.CreatedAt.HasValue)
+                            {
+                                <dt class="col-4 text-muted">Created</dt>
+                                <dd class="col-8">
+                                    @Model.CreatedAt.Value.ToString("yyyy-MM-dd HH:mm")
+                                </dd>
+                            }
+
+                            @if (Model.UpdatedAt.HasValue)
+                            {
+                                <dt class="col-4 text-muted">Updated</dt>
+                                <dd class="col-8">
+                                    @Model.UpdatedAt.Value.ToString("yyyy-MM-dd HH:mm")
+                                </dd>
+                            }
+
+                            @if (Model.Type == "journal" && Model.JournalDate.HasValue)
+                            {
+                                <dt class="col-4 text-muted">Journal</dt>
+                                <dd class="col-8">
+                                    @Model.JournalDate.Value.ToString("yyyy-MM-dd")
+                                    @if (Model.JournalTime.HasValue)
+                                    {
+                                        <span>@Model.JournalTime.Value.ToString(@"hh\:mm")</span>
+                                    }
+                                </dd>
+                            }
+
+                            @if (!string.IsNullOrWhiteSpace(Model.Category))
+                            {
+                                <dt class="col-4 text-muted">Category</dt>
+                                <dd class="col-8">
+                                    <a asp-page="/Category" asp-route-slug="@Model.CategorySlug">
+                                        @Model.Category
+                                    </a>
+                                </dd>
+                            }
+                        </dl>
+                    </div>
+                </div>
+
+                @if (Model.Tags?.Any() == true)
+                {
+                    <div class="card mb-3">
+                        <div class="card-body py-2 px-3">
+                            <h2 class="h6 mb-2">Tags</h2>
+                            <div class="d-flex flex-wrap gap-1 small">
+                                @foreach (var tag in Model.Tags)
+                                {
+                                    <a asp-page="/Tag"
+                                       asp-route-slug="@tag.Slug"
+                                       class="badge bg-light text-dark border">
+                                        #@tag.Name
+                                    </a>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                }
+
+                <!-- Actions -->
+                <div class="card">
+                    <div class="card-body py-2 px-3 d-grid gap-2">
+                        <a asp-page="/PageEdit"
+                           asp-route-slug="@Model.Slug"
+                           class="btn btn-sm btn-primary">
+                            Edit
+                        </a>
+                        <a asp-page="/Compose"
+                           asp-route-type="note"
+                           class="btn btn-sm btn-outline-secondary">
+                            New note
+                        </a>
+
+                        @* Delete would normally be a POST with confirmation *@
+                        @* <form method="post" asp-page-handler="Delete">
+                            <button class="btn btn-sm btn-outline-danger w-100" type="submit">
+                                Delete
+                            </button>
+                           </form> *@
+                    </div>
+                </div>
+            </aside>
+        </div>
+    </div>
+}

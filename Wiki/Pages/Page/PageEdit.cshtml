@@ -1,0 +1,165 @@
+﻿@page "/page/{slug}/Edit"
+@model PageEditModel
+@{
+    ViewData["Title"] = "Edit: " + (Model.Title ?? "Page");
+}
+
+<h1 class="h4 mb-3">Edit</h1>
+
+@if (Model.NotFound)
+{
+    <p class="text-muted small">
+        This page could not be found.
+    </p>
+}
+else
+{
+    <form method="post">
+        <div class="row g-3">
+            <!-- Left column: main fields -->
+            <div class="col-12 col-lg-8">
+                <!-- Type selector -->
+                <div class="mb-3">
+                    <label class="form-label small text-muted d-block">Type</label>
+                    <div class="btn-group btn-group-sm" role="group" aria-label="Entry type">
+                        <input type="radio" class="btn-check" name="Type" id="typeNote" value="note"
+                               @(Model.Type == "note" ? "checked" : "") onchange="updateEditVisibility()" />
+                        <label class="btn btn-outline-secondary" for="typeNote">Note</label>
+
+                        <input type="radio" class="btn-check" name="Type" id="typePost" value="post"
+                               @(Model.Type == "post" ? "checked" : "") onchange="updateEditVisibility()" />
+                        <label class="btn btn-outline-secondary" for="typePost">Post</label>
+
+                        <input type="radio" class="btn-check" name="Type" id="typeJournal" value="journal"
+                               @(Model.Type == "journal" ? "checked" : "") onchange="updateEditVisibility()" />
+                        <label class="btn btn-outline-secondary" for="typeJournal">Journal</label>
+                    </div>
+                    <span class="text-danger small" asp-validation-for="Type"></span>
+                </div>
+
+                <!-- Title -->
+                <div class="mb-3">
+                    <label class="form-label">Title</label>
+                    <input asp-for="Title" class="form-control" />
+                    <span class="text-danger small" asp-validation-for="Title"></span>
+                </div>
+
+                <!-- Journal-only date/time -->
+                <div id="journalDateTimeSection" class="row g-2 mb-3 d-none">
+                    <div class="col-6 col-md-4">
+                        <label class="form-label small text-muted">Date</label>
+                        <input asp-for="JournalDate" type="date" class="form-control form-control-sm" />
+                        <span class="text-danger small" asp-validation-for="JournalDate"></span>
+                    </div>
+                    <div class="col-6 col-md-4">
+                        <label class="form-label small text-muted">Time</label>
+                        <input asp-for="JournalTime" type="time" class="form-control form-control-sm" />
+                        <span class="text-danger small" asp-validation-for="JournalTime"></span>
+                    </div>
+                </div>
+
+                <!-- Summary -->
+                <div class="mb-3">
+                    <label class="form-label small text-muted">Summary (optional)</label>
+                    <textarea asp-for="Summary" class="form-control" rows="2"></textarea>
+                    <span class="text-danger small" asp-validation-for="Summary"></span>
+                </div>
+
+                <!-- Content -->
+                <div class="mb-3">
+                    <label class="form-label">Content</label>
+                    <textarea asp-for="Content" class="form-control" rows="12"></textarea>
+                    <span class="text-danger small" asp-validation-for="Content"></span>
+                </div>
+            </div>
+
+            <!-- Right column: metadata -->
+            <div class="col-12 col-lg-4">
+                <div class="card mb-3">
+                    <div class="card-body py-3 px-3">
+                        <h2 class="h6 mb-2">Details</h2>
+
+                        <!-- Category -->
+                        <div class="mb-2">
+                            <label class="form-label small text-muted">Category</label>
+                            <input asp-for="Category" class="form-control form-control-sm" />
+                            <span class="text-danger small" asp-validation-for="Category"></span>
+                        </div>
+
+                        <!-- Tags -->
+                        <div class="mb-2">
+                            <label class="form-label small text-muted">Tags</label>
+                            <input asp-for="Tags" class="form-control form-control-sm"
+                                   placeholder="comma, separated, tags" />
+                            <span class="text-danger small" asp-validation-for="Tags"></span>
+                        </div>
+
+                        <!-- Pinned (notes/posts only) -->
+                        <div id="pinnedSection" class="form-check mt-2">
+                            <input asp-for="IsPinned" class="form-check-input" />
+                            <label class="form-check-label small" asp-for="IsPinned">
+                                Pin this entry
+                            </label>
+                        </div>
+
+                        <hr class="my-3" />
+
+                        <div class="small text-muted">
+                            <div>
+                                Created:
+                                @(Model.CreatedAt?.ToString("yyyy-MM-dd HH:mm") ?? "—")
+                            </div>
+                            <div>
+                                Updated:
+                                @(Model.UpdatedAt?.ToString("yyyy-MM-dd HH:mm") ?? "—")
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="d-grid gap-2">
+                    <button type="submit" class="btn btn-primary btn-sm">Save changes</button>
+                    <a asp-page="/Page" asp-route-slug="@Model.Slug"
+                       class="btn btn-outline-secondary btn-sm">
+                        Cancel
+                    </a>
+
+                    @* Delete would normally be a POST + confirmation *@
+                    @* <form method="post" asp-page-handler="Delete">
+                        <button class="btn btn-outline-danger btn-sm" type="submit">
+                            Delete
+                        </button>
+                       </form> *@
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-3">
+            <span class="text-danger small" asp-validation-summary="All"></span>
+        </div>
+    </form>
+}
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        function updateEditVisibility() {
+            var type = document.querySelector('input[name="Type"]:checked')?.value || "note";
+            var journalSection = document.getElementById('journalDateTimeSection');
+            var pinnedSection = document.getElementById('pinnedSection');
+
+            if (type === "journal") {
+                if (journalSection) journalSection.classList.remove('d-none');
+                if (pinnedSection) pinnedSection.classList.add('d-none');
+            } else {
+                if (journalSection) journalSection.classList.add('d-none');
+                if (pinnedSection) pinnedSection.classList.remove('d-none');
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            updateEditVisibility();
+        });
+    </script>
+}
