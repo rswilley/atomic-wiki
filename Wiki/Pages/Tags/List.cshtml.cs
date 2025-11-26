@@ -1,7 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
-public class TagModel : PageModel
+namespace Wiki.Pages.Tags;
+
+public class TagListModel : PageModel
 {
     [FromRoute]
     public string Slug { get; set; } = "";

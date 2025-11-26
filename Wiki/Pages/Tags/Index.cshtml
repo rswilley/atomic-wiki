@@ -1,0 +1,148 @@
+﻿@page "/tags"
+@model TagsIndexModel
+@{
+    ViewData["Title"] = "Tags";
+}
+
+@section Styles {
+    <style>
+        .tag-index-card {
+            border-left: 3px solid transparent;
+            transition: box-shadow 0.15s ease, transform 0.15s ease, border-left-color 0.15s ease;
+        }
+
+        .tag-index-card:hover {
+            border-left-color: #0d6efd;
+            box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.06);
+            transform: translateY(-2px);
+        }
+
+        .tag-chip {
+            transition: box-shadow 0.15s ease, transform 0.15s ease, background-color 0.15s ease;
+        }
+
+        .tag-chip:hover {
+            box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.06);
+            transform: translateY(-1px);
+            background-color: #f8f9fa;
+        }
+    </style>
+}
+
+<h1 class="h4 mb-3">Tags</h1>
+
+<!-- Filters / controls -->
+<section class="mb-3">
+    <form method="get" class="row g-2 align-items-end">
+        <div class="col-12 col-md-4">
+            <label class="form-label small text-muted">Search tags</label>
+            <input name="q"
+                   value="@Model.Query"
+                   class="form-control form-control-sm"
+                   placeholder="Filter by name..." />
+        </div>
+
+        <div class="col-6 col-md-3">
+            <label class="form-label small text-muted">Min count</label>
+            <input type="number"
+                   name="minCount"
+                   value="@(Model.MinCount?.ToString() ?? "")"
+                   class="form-control form-control-sm"
+                   placeholder="e.g. 1" />
+        </div>
+
+        <div class="col-6 col-md-3">
+            <label class="form-label small text-muted">Order</label>
+            <select name="order"
+                    class="form-select form-select-sm">
+                <option value="name"
+                    selected="@("name".Equals(Model.Order, StringComparison.OrdinalIgnoreCase))">
+                    Name (A–Z)
+                </option>
+                <option value="count-desc"
+                    selected="@("count-desc".Equals(Model.Order, StringComparison.OrdinalIgnoreCase))">
+                    Most used
+                </option>
+                <option value="recent"
+                    selected="@("recent".Equals(Model.Order, StringComparison.OrdinalIgnoreCase))">
+                    Recently used
+                </option>
+            </select>
+        </div>
+
+        <div class="col-12 col-md-2 d-grid">
+            <button type="submit" class="btn btn-sm btn-outline-secondary">
+                Apply
+            </button>
+        </div>
+    </form>
+</section>
+
+<!-- Tag chips on mobile, cards/grid on larger screens -->
+<section>
+    @if (Model.Tags.Any())
+    {
+        <!-- Mobile: wrap chips; md+: card grid -->
+        <div class="d-md-none">
+            <div class="d-flex flex-wrap gap-2">
+                @foreach (var tag in Model.Tags)
+                {
+                    <a asp-page="/Tag"
+                       asp-route-slug="@tag.Slug"
+                       class="badge bg-light text-dark border tag-chip">
+                        #@tag.Name
+                        <span class="text-muted ms-1">(@tag.Count)</span>
+                    </a>
+                }
+            </div>
+        </div>
+
+        <div class="d-none d-md-block">
+            <div class="row g-3">
+                @foreach (var tag in Model.Tags)
+                {
+                    <!-- md: 2 columns; lg: 3; xl: 4 -->
+                    <div class="col-md-6 col-lg-4 col-xl-3">
+                        <article class="card tag-index-card h-100">
+                            <div class="card-body py-2 px-3 d-flex flex-column">
+                                <div class="d-flex justify-content-between align-items-start mb-1">
+                                    <h2 class="h6 mb-0">
+                                        <a asp-page="/Tag"
+                                           asp-route-slug="@tag.Slug"
+                                           class="stretched-link text-decoration-none">
+                                            #@tag.Name
+                                        </a>
+                                    </h2>
+
+                                    <span class="badge bg-light text-dark border small">
+                                        @tag.Count @((tag.Count == 1) ? "item" : "items")
+                                    </span>
+                                </div>
+
+                                @if (!string.IsNullOrWhiteSpace(tag.Description))
+                                {
+                                    <p class="small text-muted mb-1">
+                                        @tag.Description
+                                    </p>
+                                }
+
+                                <div class="small text-muted mt-auto">
+                                    Last used:
+                                    @((tag.LastUsed.HasValue)
+                                        ? tag.LastUsed.Value.ToString("yyyy-MM-dd")
+                                        : "—")
+                                </div>
+                            </div>
+                        </article>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+    else
+    {
+        <p class="text-muted small">
+            No tags found with the current filters.
+        </p>
+    }
+</section>
