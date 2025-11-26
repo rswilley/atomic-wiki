@@ -8,24 +8,104 @@ html {
   }
 }
 
-.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+.atomic-layout {
+  height: 100vh;
 }
 
-html {
-  position: relative;
-  min-height: 100%;
+/* Sidebar base */
+.atomic-sidebar {
+  background-color: #f8f9fa;
+  overflow-y: auto;
 }
 
-body {
-  margin-bottom: 60px;
+/* Desktop sidebar: fixed width */
+@media (min-width: 992px) {
+  .atomic-sidebar {
+    width: 260px;
+    position: relative;
+    transform: none !important;
+    box-shadow: none;
+  }
 }
 
-.form-floating > .form-control-plaintext::placeholder, .form-floating > .form-control::placeholder {
-  color: var(--bs-secondary-color);
-  text-align: end;
+/* Mobile / tablet sidebar */
+@media (max-width: 991.98px) {
+  .atomic-layout {
+    height: 100vh;
+  }
+
+  .atomic-sidebar {
+    position: fixed;
+    top: 3rem; /* matches topbar height */
+    left: 0;
+    height: calc(100vh - 3rem);
+    width: 80%;
+    max-width: 320px;
+    z-index: 1040;
+    transform: translateX(-100%);
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    box-shadow: 0 0 0 rgba(0,0,0,0);
+  }
+
+  .atomic-sidebar.open {
+    transform: translateX(0);
+    box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.15);
+  }
+
+  .atomic-main {
+    min-width: 0;
+  }
+
+  .atomic-topbar {
+    position: sticky;
+    top: 0;
+    z-index: 1030;
+  }
 }
 
-.form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
-  text-align: start;
+/* Top bar */
+.atomic-topbar {
+  height: 3rem;
+  background-color: #ffffff;
 }
+
+/* Main content */
+.atomic-content {
+  padding: 1rem 1.25rem;
+  overflow-y: auto;
+}
+
+/* Mobile overlay */
+.atomic-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.35);
+  z-index: 1030;
+  display: none;
+}
+
+.atomic-overlay.show {
+  display: block;
+}
+
+/*.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {*/
+/*  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;*/
+/*}*/
+
+/*html {*/
+/*  position: relative;*/
+/*  min-height: 100%;*/
+/*}*/
+
+/*body {*/
+/*  margin-bottom: 60px;*/
+/*}*/
+
+/*.form-floating > .form-control-plaintext::placeholder, .form-floating > .form-control::placeholder {*/
+/*  color: var(--bs-secondary-color);*/
+/*  text-align: end;*/
+/*}*/
+
+/*.form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {*/
+/*  text-align: start;*/
+/*}*/

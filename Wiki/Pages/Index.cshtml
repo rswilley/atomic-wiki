@@ -1,10 +1,77 @@
 ﻿@page
 @model IndexModel
 @{
-    ViewData["Title"] = "Home page";
+    ViewData["Title"] = "Home";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<h1 class="h4 mb-3">Today in Atomic Wiki</h1>
+
+<div class="row g-3">
+    <div class="col-lg-8">
+        <!-- Recent notes -->
+        <section class="mb-4">
+            <h2 class="h6 text-muted mb-2">Recent Notes</h2>
+
+            <ul class="list-group list-group-flush">
+                @* Example static items; later bind from Model *@
+                <li class="list-group-item px-0">
+                    <a asp-page="/Page" asp-route-slug="telemetry-cluster-design"
+                       class="fw-semibold d-block">
+                        Telemetry cluster design notes
+                    </a>
+                    <small class="text-muted">
+                        Last updated 2025-11-25 • tags: telemetry, orleans
+                    </small>
+                </li>
+                <li class="list-group-item px-0">
+                    <a asp-page="/Page" asp-route-slug="ai-visual-workflow"
+                       class="fw-semibold d-block">
+                        AI visual workflow for techno mixes
+                    </a>
+                    <small class="text-muted">
+                        Last updated 2025-11-20 • tags: ai, visuals
+                    </small>
+                </li>
+            </ul>
+        </section>
+
+        <!-- Pinned -->
+        <section>
+            <h2 class="h6 text-muted mb-2">Pinned</h2>
+            <div class="row g-2">
+                <div class="col-md-6">
+                    <div class="card card-body py-2">
+                        <a asp-page="/Page" asp-route-slug="atomic-wiki-architecture"
+                           class="fw-semibold">
+                            Atomic Wiki architecture
+                        </a>
+                        <small class="text-muted d-block">
+                            Core decisions, schema, and patterns.
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <div class="col-lg-4">
+        <!-- Quick actions -->
+        <section class="mb-3">
+            <h2 class="h6 text-muted mb-2">Quick Actions</h2>
+            <div class="d-grid gap-2">
+                <a asp-page="/NewNote" class="btn btn-sm btn-primary">New Note</a>
+                <a asp-page="/NewPost" class="btn btn-sm btn-outline-secondary">New Journal Entry</a>
+            </div>
+        </section>
+
+        <!-- Stats (placeholder) -->
+        <section>
+            <h2 class="h6 text-muted mb-2">Stats</h2>
+            <ul class="list-unstyled small mb-0">
+                <li><strong>42</strong> notes</li>
+                <li><strong>13</strong> posts</li>
+                <li><strong>18</strong> tags</li>
+            </ul>
+        </section>
+    </div>
 </div>
