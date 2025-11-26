@@ -1,4 +1,19 @@
-﻿// Please see documentation at https://learn.microsoft.com/aspnet/core/client-side/bundling-and-minification
-// for details on configuring this project to bundle and minify static web assets.
+﻿function toggleSidebar(force) {
+    var sidebar = document.getElementById('atomicSidebar');
+    var overlay = document.getElementById('atomicOverlay');
 
-// Write your JavaScript code.
+    var willOpen;
+    if (typeof force === 'boolean') {
+        willOpen = force;
+    } else {
+        willOpen = !sidebar.classList.contains('open');
+    }
+
+    if (willOpen) {
+        sidebar.classList.add('open');
+        overlay.classList.add('show');
+    } else {
+        sidebar.classList.remove('open');
+        overlay.classList.remove('show');
+    }
+}

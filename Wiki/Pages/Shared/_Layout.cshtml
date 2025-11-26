@@ -1,52 +1,113 @@
-﻿<!DOCTYPE html>
+﻿@{
+    Layout = null;
+    var title = ViewData["Title"] as string ?? "Atomic Wiki";
+}
+
+<!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>@ViewData["Title"] - Wiki</title>
-    <script type="importmap"></script>
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css"/>
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true"/>
-    <link rel="stylesheet" href="~/Wiki.styles.css" asp-append-version="true"/>
+    <meta charset="utf-8" />
+    <title>@title - Atomic Wiki</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" />
 </head>
 <body>
-<header>
-    <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-        <div class="container">
-            <a class="navbar-brand" asp-area="" asp-page="/Index">Wiki</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                    aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                <ul class="navbar-nav flex-grow-1">
-                    <li class="nav-item">
-                        <a class="nav-link text-dark" asp-area="" asp-page="/Index">Home</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link text-dark" asp-area="" asp-page="/Privacy">Privacy</a>
-                    </li>
-                </ul>
-            </div>
+    <div class="atomic-layout d-flex flex-lg-row flex-column">
+        <!-- Sidebar -->
+        <aside id="atomicSidebar" class="atomic-sidebar border-end d-lg-block">
+            @await Html.PartialAsync("_NavSidebar")
+        </aside>
+
+        <!-- Mobile overlay -->
+        <div id="atomicOverlay" class="atomic-overlay d-lg-none" onclick="toggleSidebar(false)"></div>
+
+        <!-- Main area -->
+        <div class="atomic-main flex-grow-1 d-flex flex-column">
+            <!-- Top bar -->
+            <header class="atomic-topbar border-bottom d-flex align-items-center justify-content-between px-3">
+                <div class="d-flex align-items-center gap-2">
+                    <!-- Mobile menu button -->
+                    <button class="btn btn-sm btn-outline-secondary d-lg-none" type="button"
+                            onclick="toggleSidebar()">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+
+                    <span class="fw-bold">Atomic Wiki</span>
+                    <span class="badge bg-secondary d-none d-sm-inline">Local</span>
+                </div>
+
+                <div class="d-flex align-items-center gap-2">
+                    <a asp-page="/Notes" class="btn btn-sm btn-outline-secondary d-none d-sm-inline-flex">Notes</a>
+                    <a asp-page="/Timeline" class="btn btn-sm btn-outline-secondary d-none d-sm-inline-flex">Timeline</a>
+                    <a asp-page="/NewNote" class="btn btn-sm btn-primary">New Note</a>
+                </div>
+            </header>
+
+            <!-- Content -->
+            <main class="atomic-content flex-grow-1">
+                @RenderBody()
+            </main>
         </div>
-    </nav>
-</header>
-<div class="container">
-    <main role="main" class="pb-3">
-        @RenderBody()
-    </main>
-</div>
-
-<footer class="border-top footer text-muted">
-    <div class="container">
-        &copy; 2025 - Wiki - <a asp-area="" asp-page="/Privacy">Privacy</a>
     </div>
-</footer>
 
-<script src="~/lib/jquery/dist/jquery.min.js"></script>
-<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-<script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js"></script>
 
-@await RenderSectionAsync("Scripts", required: false)
+    @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
+
+@* <!DOCTYPE html> *@
+@* <html lang="en"> *@
+@* <head> *@
+@*     <meta charset="utf-8"/> *@
+@*     <meta name="viewport" content="width=device-width, initial-scale=1.0"/> *@
+@*     <title>@ViewData["Title"] - Wiki</title> *@
+@*     <script type="importmap"></script> *@
+@*     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css"/> *@
+@*     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true"/> *@
+@*     <link rel="stylesheet" href="~/Wiki.styles.css" asp-append-version="true"/> *@
+@* </head> *@
+@* <body> *@
+@* <header> *@
+@*     <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3"> *@
+@*         <div class="container"> *@
+@*             <a class="navbar-brand" asp-area="" asp-page="/Index">Wiki</a> *@
+@*             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent" *@
+@*                     aria-expanded="false" aria-label="Toggle navigation"> *@
+@*                 <span class="navbar-toggler-icon"></span> *@
+@*             </button> *@
+@*             <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between"> *@
+@*                 <ul class="navbar-nav flex-grow-1"> *@
+@*                     <li class="nav-item"> *@
+@*                         <a class="nav-link text-dark" asp-area="" asp-page="/Index">Home</a> *@
+@*                     </li> *@
+@*                     <li class="nav-item"> *@
+@*                         <a class="nav-link text-dark" asp-area="" asp-page="/Privacy">Privacy</a> *@
+@*                     </li> *@
+@*                 </ul> *@
+@*             </div> *@
+@*         </div> *@
+@*     </nav> *@
+@* </header> *@
+@* <div class="container"> *@
+@*     <main role="main" class="pb-3"> *@
+@*         @RenderBody() *@
+@*     </main> *@
+@* </div> *@
+@* *@
+@* <footer class="border-top footer text-muted"> *@
+@*     <div class="container"> *@
+@*         &copy; 2025 - Wiki - <a asp-area="" asp-page="/Privacy">Privacy</a> *@
+@*     </div> *@
+@* </footer> *@
+@* *@
+@* <script src="~/lib/jquery/dist/jquery.min.js"></script> *@
+@* <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script> *@
+@* <script src="~/js/site.js" asp-append-version="true"></script> *@
+@* *@
+@* @await RenderSectionAsync("Scripts", required: false) *@
+@* </body> *@
+@* </html> *@
