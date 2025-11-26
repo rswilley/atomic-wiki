@@ -1,0 +1,127 @@
+﻿@page
+@model NotesModel
+@{
+    ViewData["Title"] = "Notes";
+}
+
+@section Styles {
+    <style>
+        .note-card {
+            border-left: 3px solid transparent;
+            transition: box-shadow 0.15s ease, transform 0.15s ease, border-left-color 0.15s ease;
+        }
+
+        .note-card:hover {
+            border-left-color: #0d6efd;
+            box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.06);
+            transform: translateY(-2px);
+        }
+    </style>
+}
+
+<h1 class="h4 mb-3">Notes</h1>
+
+<!-- Filters / controls -->
+<section class="mb-3">
+    <form method="get" class="row g-2 align-items-end">
+        <div class="col-12 col-md-4">
+            <label class="form-label small text-muted">Search</label>
+            <input name="q"
+                   value="@Model.Query"
+                   class="form-control form-control-sm"
+                   placeholder="Search notes..." />
+        </div>
+
+        <div class="col-6 col-md-3">
+            <label class="form-label small text-muted">Category</label>
+            <input name="category"
+                   value="@Model.Category"
+                   class="form-control form-control-sm"
+                   placeholder="Category..." />
+        </div>
+
+        <div class="col-6 col-md-3">
+            <label class="form-label small text-muted">Tag</label>
+            <input name="tag"
+                   value="@Model.Tag"
+                   class="form-control form-control-sm"
+                   placeholder="Tag..." />
+        </div>
+
+        <div class="col-12 col-md-2 d-grid">
+            <button type="submit" class="btn btn-sm btn-outline-secondary">
+                Apply
+            </button>
+        </div>
+    </form>
+</section>
+
+<!-- Notes list -->
+<section>
+    @if (Model.Notes.Any())
+    {
+        <div class="row g-3">
+            @foreach (var note in Model.Notes)
+            {
+                <!-- Mobile: full width; md+: 2 columns -->
+                <div class="col-12 col-md-6">
+                    <article class="card note-card h-100">
+                        <div class="card-body py-2 px-3 d-flex flex-column">
+                            <div class="d-flex justify-content-between align-items-start mb-1">
+                                <div class="small text-muted">
+                                    Updated @note.UpdatedAt.ToString("yyyy-MM-dd")
+                                </div>
+
+                                @if (note.IsPinned)
+                                {
+                                    <span class="badge bg-warning text-dark small ms-2">Pinned</span>
+                                }
+                            </div>
+
+                            <h2 class="h6 mb-1">
+                                <a asp-page="/Page"
+                                   asp-route-slug="@note.Slug"
+                                   class="text-decoration-none">
+                                    @note.Title
+                                </a>
+                            </h2>
+
+                            <div class="small text-muted mb-1">
+                                @if (!string.IsNullOrWhiteSpace(note.Category))
+                                {
+                                    <span>@note.Category</span>
+                                }
+                            </div>
+
+                            @if (!string.IsNullOrWhiteSpace(note.Summary))
+                            {
+                                <p class="small text-muted mb-2">
+                                    @note.Summary
+                                </p>
+                            }
+
+                            @if (note.Tags?.Any() == true)
+                            {
+                                <div class="mt-auto pt-1">
+                                    <div class="d-flex flex-wrap gap-1 small">
+                                        @foreach (var tag in note.Tags)
+                                        {
+                                            <span class="badge bg-light text-dark border">@tag</span>
+                                        }
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </article>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <p class="text-muted small">
+            No notes found.
+            <a asp-page="/NewNote">Create your first note</a>.
+        </p>
+    }
+</section>
