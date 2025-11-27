@@ -1,5 +1,4 @@
 ﻿using System.Text;
-using System.Text.RegularExpressions;
 using Markdig;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
@@ -36,12 +35,13 @@ public class MarkdownService : IMarkdownService
     
     public string? GetFirstHeader(string markdown)
     {
-        string pattern = @"^#\s+(.+)$";
-
-        Match match = Regex.Match(markdown, pattern);
-        if (match.Success)
+        var lines = markdown.Split(Environment.NewLine);
+        foreach (var line in lines)
         {
-            return match.Groups[1].Value;
+            if (line.StartsWith("# "))
+            {
+                return line[2..];
+            }
         }
 
         return null;
