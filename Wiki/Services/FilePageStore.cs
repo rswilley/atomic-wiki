@@ -1,8 +1,6 @@
 ﻿using System.Text;
 using Wiki.Extensions;
 using Wiki.Models;
-using YamlDotNet.Serialization;
-using YamlDotNet.Serialization.NamingConventions;
 
 namespace Wiki.Services;
 
@@ -16,15 +14,6 @@ public class FilePageStore(
     IConfigurationService configurationService,
     IMarkdownService markdownService) : IPageStore
 {
-    private readonly IDeserializer _yaml = new DeserializerBuilder()
-        .WithNamingConvention(CamelCaseNamingConvention.Instance)
-        .IgnoreUnmatchedProperties()
-        .Build();
-    private readonly ISerializer _yamlSerializer = new SerializerBuilder()
-        .WithNamingConvention(CamelCaseNamingConvention.Instance)
-        .ConfigureDefaultValuesHandling(DefaultValuesHandling.OmitNull) // cleaner YAML
-        .Build();
-
     public async Task<List<PageDocument>> GetAll()
     {
         var docs = new List<PageDocument>();
