@@ -9,42 +9,31 @@ public enum PageType
     Journal = 3
 }
 
+public class PageWriteModel
+{
+    public string Type { get; set; } = nameof(PageType.Note).ToLower();
+    public string Markdown { get; set; } = "";
+    public string? Category { get; set; }
+    public string? Tags { get; set; }
+    public bool IsPinned { get; set; }
+    public DateTime? CreatedAt { get; set; }
+}
+
 public class Page
 {
-    public int Id { get; set; }
-
-    [Required]
-    [MaxLength(200)]
+    public required string PermanentId { get; set; }
     public string Title { get; set; } = "";
-
-    [Required]
-    [MaxLength(200)]
     public string Slug { get; set; } = "";
     
-    [Required]
-    public PageType Type { get; set; } = PageType.Note;
-
-    [MaxLength(300)]
-    public string? Summary { get; set; }
-
-    public string Content { get; set; } = "";
-    public string RenderedContent { get; set; } = "";
+    public string Type { get; set; } = nameof(PageType.Note).ToLower();
+    public string? Category { get; set; }
+    public string? Tags { get; set; }
     
-    // Foreign key
-    public int? CategoryId { get; set; }   // nullable = page can have no category
-
-    // Navigation property
-    public PageCategory? Category { get; set; }
+    public string Markdown { get; set; } = "";
+    public string RenderedHtml { get; set; } = "";
 
     public bool IsPinned { get; set; }
-
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-    public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
-
+    
     // Journal-specific
     public DateTime? JournalDate { get; set; }
-    public TimeSpan? JournalTime { get; set; }
-    
-    public Guid ExternalId { get; set; } = Guid.NewGuid();
-    public ICollection<PageTag> Tags { get; set; } = new List<PageTag>();
 }
