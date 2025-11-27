@@ -1,12 +1,8 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Wiki.Data;
-using Wiki.Models;
-
-namespace Wiki.Pages;
+﻿namespace Wiki.Pages;
 
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
-public class NotesModel(AtomicWikiDbContext db) : PageModel
+public class NotesModel : PageModel
 {
     public string? Query { get; set; }
     public string? Category { get; set; }
@@ -20,9 +16,9 @@ public class NotesModel(AtomicWikiDbContext db) : PageModel
         Category = category;
         Tag = tag;
 
-        var queryable = db.Pages
-            .AsNoTracking()
-            .Where(p => p.Type == PageType.Note);
+        // var queryable = db.Pages
+        //     .AsNoTracking()
+        //     .Where(p => p.Type == PageType.Note);
 
         // if (!string.IsNullOrWhiteSpace(Query))
         // {
@@ -45,20 +41,7 @@ public class NotesModel(AtomicWikiDbContext db) : PageModel
         //         n.Tags.Any(t => t.Equals(Tag, StringComparison.OrdinalIgnoreCase)));
         // }
 
-        Notes = (await queryable
-            .OrderByDescending(n => n.IsPinned)
-            .ThenByDescending(n => n.UpdatedAt)
-            .Include(page => page.Tags)
-            .ToListAsync()).Select(p => new NoteListItem
-        {
-            Title = p.Title,
-            Slug = p.Slug,
-            UpdatedAt = p.UpdatedAt,
-            Category = "TODO",
-            Summary = "TODO",
-            Tags = p.Tags.ToList().Select(t => t.Name),
-            IsPinned = p.IsPinned
-        }).ToList();
+        Notes = [];
     }
 }
 

@@ -1,22 +1,22 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Wiki.Data;
+using Wiki.Models;
+using Wiki.Services;
 
 namespace Wiki.Pages;
 
-public class ComposeModel(AtomicWikiDbContext db) : PageModel
+public class ComposeModel(IPageService pageService) : PageModel
 {
-    private static readonly string[] AllowedTypes = ["note", "post", "journal"];
+    private static readonly string[] AllowedTypes = [
+        nameof(PageType.Note).ToLower(), 
+        nameof(PageType.Post).ToLower(), 
+        nameof(PageType.Journal).ToLower()
+    ];
 
     [BindProperty]
     [Required]
-    public string Type { get; set; } = "note"; // note | post | journal
-
-    [BindProperty]
-    [Required]
-    [StringLength(200)]
-    public string Title { get; set; } = "";
+    public string Type { get; set; } = nameof(PageType.Note).ToLower();
 
     // Journal-specific
     [BindProperty]
@@ -24,16 +24,8 @@ public class ComposeModel(AtomicWikiDbContext db) : PageModel
     public DateTime? JournalDate { get; set; }
 
     [BindProperty]
-    [DataType(DataType.Time)]
-    public TimeSpan? JournalTime { get; set; }
-
-    [BindProperty]
-    [StringLength(300)]
-    public string? Summary { get; set; }
-
-    [BindProperty]
     [Required]
-    public string Content { get; set; } = "# Untitled";
+    public string Markdown { get; set; } = "# Untitled";
 
     [BindProperty]
     [StringLength(100)]
@@ -55,14 +47,12 @@ public class ComposeModel(AtomicWikiDbContext db) : PageModel
         }
         else
         {
-            Type = "note";
+            Type = nameof(PageType.Note).ToLower();
         }
 
-        if (Type == "journal")
+        if (Type.Equals(nameof(PageType.Journal), StringComparison.CurrentCultureIgnoreCase))
         {
             JournalDate ??= DateTime.Today;
-            // optional: default time to now
-            JournalTime ??= DateTime.Now.TimeOfDay;
         }
     }
 
@@ -79,7 +69,7 @@ public class ComposeModel(AtomicWikiDbContext db) : PageModel
         }
 
         // Journal must have date
-        if (Type == "journal" && !JournalDate.HasValue)
+        if (Type == nameof(PageType.Journal).ToLower() && !JournalDate.HasValue)
         {
             ModelState.AddModelError(nameof(JournalDate), "Journal entries require a date.");
         }
@@ -87,34 +77,27 @@ public class ComposeModel(AtomicWikiDbContext db) : PageModel
         if (!ModelState.IsValid)
         {
             // Ensure default date/time if coming back with errors
-            if (Type == "journal" && !JournalDate.HasValue)
+            if (Type == nameof(PageType.Journal).ToLower() && !JournalDate.HasValue)
                 JournalDate = DateTime.Today;
 
             return Page();
         }
 
-        // var page = new Models.Page
-        // {
-        //     Title = Title,
-        //     Slug = SlugGenerator.FromTitle(Title),
-        //     Content = Content,
-        //     Type = Type, // "note", "post", or "journal"
-        //     CreatedAt = DateTime.UtcNow,
-        //     UpdatedAt = DateTime.UtcNow,
-        //     IsPinned = Type != "journal" && IsPinned,
-        //     Summary = Summary,
-        //     Category = Category,
-        //     Tags = ParseTags(Tags)
-        // };
+        var page = new PageWriteModel
+        {
+            Markdown = Markdown,
+            Type = Type!,
+            IsPinned = Type != nameof(PageType.Journal).ToLower() && IsPinned,
+            Category = Category,
+            Tags = Tags
+        };
 
-        // if (Type == "journal")
-        // {
-        //     page.JournalDate = JournalDate.Value;
-        //     page.JournalTime = JournalTime;
-        // }
-        //
-        // db.Pages.Add(page);
-        // await db.SaveChangesAsync();
+        if (Type == nameof(PageType.Journal).ToLower())
+        {
+            page.CreatedAt = JournalDate;
+        }
+        
+        await pageService.Save(page);
         return RedirectToPage("/Index");
     }
 }

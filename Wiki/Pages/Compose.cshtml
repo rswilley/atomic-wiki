@@ -43,13 +43,6 @@
                 <span class="text-danger small" asp-validation-for="Type"></span>
             </div>
 
-            <!-- Title -->
-            <div class="mb-3">
-                <label class="form-label">Title</label>
-                <input asp-for="Title" class="form-control" placeholder="Give this entry a title..." />
-                <span class="text-danger small" asp-validation-for="Title"></span>
-            </div>
-
             <!-- Journal-only date/time (shown via JS) -->
             <div id="journalDateTimeSection" class="row g-2 mb-3 d-none">
                 <div class="col-6 col-md-4">
@@ -57,30 +50,17 @@
                     <input asp-for="JournalDate" type="date" class="form-control form-control-sm" />
                     <span class="text-danger small" asp-validation-for="JournalDate"></span>
                 </div>
-                <div class="col-6 col-md-4">
-                    <label class="form-label small text-muted">Time</label>
-                    <input asp-for="JournalTime" type="time" class="form-control form-control-sm" />
-                    <span class="text-danger small" asp-validation-for="JournalTime"></span>
-                </div>
-            </div>
-
-            <!-- Summary (optional, mostly for posts / notes) -->
-            <div class="mb-3">
-                <label class="form-label small text-muted">Summary (optional)</label>
-                <textarea asp-for="Summary" class="form-control" rows="2"
-                          placeholder="One or two sentences describing this entry..."></textarea>
-                <span class="text-danger small" asp-validation-for="Summary"></span>
             </div>
 
             <!-- Content -->
             <div class="mb-3">
                 <label class="form-label">Content</label>
                 <div id="toolbar"></div>
-                <textarea asp-for="Content" class="form-control" rows="10"></textarea>
+                <textarea asp-for="Markdown" class="form-control" rows="10"></textarea>
                 <script type="text/javascript">
-                  var tinyMDE = new TinyMDE.Editor({ textarea: "Content" });
+                  var tinyMDE = new TinyMDE.Editor({ textarea: "Markdown" });
                 </script>
-                <span class="text-danger small" asp-validation-for="Content"></span>
+                <span class="text-danger small" asp-validation-for="Markdown"></span>
             </div>
         </div>
 
