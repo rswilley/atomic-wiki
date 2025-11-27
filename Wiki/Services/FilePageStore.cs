@@ -1,5 +1,4 @@
 ﻿using System.Text;
-using Markdig;
 using Wiki.Extensions;
 using Wiki.Models;
 using YamlDotNet.Serialization;
@@ -13,7 +12,9 @@ public interface IPageStore
     Task Save(PageDocument doc);
 }
 
-public class FilePageStore(IConfigurationService configurationService) : IPageStore
+public class FilePageStore(
+    IConfigurationService configurationService,
+    IMarkdownService markdownService) : IPageStore
 {
     private readonly IDeserializer _yaml = new DeserializerBuilder()
         .WithNamingConvention(CamelCaseNamingConvention.Instance)
@@ -22,9 +23,6 @@ public class FilePageStore(IConfigurationService configurationService) : IPageSt
     private readonly ISerializer _yamlSerializer = new SerializerBuilder()
         .WithNamingConvention(CamelCaseNamingConvention.Instance)
         .ConfigureDefaultValuesHandling(DefaultValuesHandling.OmitNull) // cleaner YAML
-        .Build();
-    private readonly MarkdownPipeline _markdownPipeline = new MarkdownPipelineBuilder()
-        .UseAdvancedExtensions()
         .Build();
 
     public async Task<List<PageDocument>> GetAll()
@@ -71,20 +69,12 @@ public class FilePageStore(IConfigurationService configurationService) : IPageSt
             doc.FilePath = Path.Combine(pagesDirectory, fileName);
         }
 
-        // Serialize front matter to YAML
-        var yaml = _yamlSerializer.Serialize(doc.Meta).TrimEnd();
-
-        // Build final file text
+        var yaml = markdownService.SerializeYaml(doc.Meta);
         var sb = new StringBuilder();
-        sb.AppendLine("---");
-        sb.AppendLine(yaml);
-        sb.AppendLine("---");
-        sb.AppendLine(); // blank line before markdown body
+        sb.Append(yaml);
         sb.Append(doc.Markdown ?? "");
 
         var content = sb.ToString();
-
-        // Safe-ish write: write temp file then move
         var tempPath = doc.FilePath + ".tmp";
 
         await File.WriteAllTextAsync(tempPath, content, Encoding.UTF8);
@@ -93,30 +83,8 @@ public class FilePageStore(IConfigurationService configurationService) : IPageSt
 
     private async Task<PageDocument?> LoadFromFileAsync(string path)
     {
-        var text = await File.ReadAllTextAsync(path, Encoding.UTF8);
-
-        // front matter format:
-        // ---\n
-        // yaml
-        // ---\n
-        // markdown body
-        if (!text.StartsWith("---"))
-        {
-            return null; // or treat as page with default meta
-        }
-
-        var parts = text.Split(["\n---", "\r\n---"], 3, StringSplitOptions.None);
-        if (parts.Length < 3)
-        {
-            return null;
-        }
-
-        // Remove leading '---'
-        var yamlText = parts[0].TrimStart('-', ' ', '\r', '\n') + parts[1];
-        var markdown = parts[2];
-
-        var meta = _yaml.Deserialize<PageFrontMatter>(yamlText);
-        var html = Markdown.ToHtml(markdown, _markdownPipeline);
+        var markdown = await File.ReadAllTextAsync(path, Encoding.UTF8);
+        var (meta, html) = markdownService.Deserialize<PageFrontMatter>(markdown);
 
         return new PageDocument
         {

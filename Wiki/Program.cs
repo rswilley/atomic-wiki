@@ -7,6 +7,7 @@ builder.Services.AddScoped<IConfigurationService, ConfigurationService>();
 builder.Services.AddScoped<IPageStore, FilePageStore>();
 builder.Services.AddScoped<IPageService, PageService>();
 builder.Services.AddScoped<IIdService, IdService>();
+builder.Services.AddScoped<IMarkdownService, MarkdownService>();
 builder.Services.AddRazorPages();
 
 var app = builder.Build();
