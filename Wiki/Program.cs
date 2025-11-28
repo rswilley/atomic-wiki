@@ -21,6 +21,7 @@ builder.Services.AddScoped<IPageStore, FilePageStore>();
 builder.Services.AddScoped<IPageService, PageService>();
 builder.Services.AddScoped<IIdService, IdService>();
 builder.Services.AddScoped<IMarkdownService, MarkdownService>();
+builder.Services.AddScoped<IRenderService, RenderService>();
 builder.Services.AddScoped<ISearchService, SearchService>();
 builder.Services.AddScoped<ISearchStore, LuceneStore>();
 builder.Services.AddRazorPages();

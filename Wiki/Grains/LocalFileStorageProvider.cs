@@ -17,7 +17,7 @@ public class LocalFileStorageProvider(
         if (File.Exists(filePath))
         {
             var json = await File.ReadAllTextAsync(Path.Combine(stateDirectory, $"{grainId.Key}.json"));
-            grainState.State = JsonSerializer.Deserialize<T>(json) ?? Activator.CreateInstance<T>()!;
+            grainState.State = JsonSerializer.Deserialize<T>(json, JsonOptions) ?? Activator.CreateInstance<T>()!;
         
             // Mark that the record exists and set a basic ETag (e.g., timestamp)
             grainState.RecordExists = true;
@@ -35,7 +35,7 @@ public class LocalFileStorageProvider(
         var stateDirectory = CreateStateDirectoryIfNotExists(stateName);
         var filePath = Path.Combine(stateDirectory, $"{grainId.Key}.json");
         await File.WriteAllTextAsync(filePath,
-            JsonSerializer.Serialize(grainState.State, new JsonSerializerOptions { WriteIndented = true }));
+            JsonSerializer.Serialize(grainState.State, JsonOptions));
     }
 
     public Task ClearStateAsync<T>(string stateName, GrainId grainId, IGrainState<T> grainState)
@@ -43,6 +43,11 @@ public class LocalFileStorageProvider(
         CreateStateDirectoryIfNotExists(stateName);
         return Task.CompletedTask;
     }
+    
+    private static readonly JsonSerializerOptions JsonOptions = new()
+    {
+        WriteIndented = true
+    };
     
     private string CreateStateDirectoryIfNotExists(string stateName)
     {

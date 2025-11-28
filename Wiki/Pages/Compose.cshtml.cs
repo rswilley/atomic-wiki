@@ -99,6 +99,26 @@ public class ComposeModel(IPageService pageService) : PageModel
         }
         
         await pageService.Save(page);
+        return RedirectBasedOnType();
+    }
+    
+    private RedirectToPageResult RedirectBasedOnType()
+    {
+        if (Type.Equals(nameof(PageType.Journal), StringComparison.CurrentCultureIgnoreCase))
+        {
+            return RedirectToPage("/Journal");
+        }
+
+        if (Type.Equals(nameof(PageType.Post), StringComparison.CurrentCultureIgnoreCase))
+        {
+            return RedirectToPage("/Posts");
+        }
+
+        if (Type.Equals(nameof(PageType.Note), StringComparison.CurrentCultureIgnoreCase))
+        {
+            return RedirectToPage("/Notes");
+        }
+        
         return RedirectToPage("/Index");
     }
 }
