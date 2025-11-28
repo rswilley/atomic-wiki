@@ -17,9 +17,9 @@ public class FilePageStore(
     public async Task<List<PageDocument>> GetAll()
     {
         var docs = new List<PageDocument>();
-        var pagesDirectory = CreatePagesDirectoryIfNotExists();
+        var outputDirectory = CreateOutputDirectoryIfNotExists();
         
-        foreach (var file in Directory.GetFiles(pagesDirectory, "*.md", SearchOption.TopDirectoryOnly))
+        foreach (var file in Directory.GetFiles(outputDirectory, "*.md", SearchOption.TopDirectoryOnly))
         {
             var doc = await LoadFromFileAsync(file);
             if (doc != null)
@@ -31,20 +31,20 @@ public class FilePageStore(
         return docs;
     }
 
-    private string CreatePagesDirectoryIfNotExists()
+    private string CreateOutputDirectoryIfNotExists()
     {
-        var pagesDirectory = Path.Combine(configurationService.GetDataDirectory(), "pages");
-        if (!Directory.Exists(pagesDirectory))
+        var directory = Path.Combine(configurationService.GetDataDirectory(), "output");
+        if (!Directory.Exists(directory))
         {
-            Directory.CreateDirectory(pagesDirectory);
+            Directory.CreateDirectory(directory);
         }
 
-        return pagesDirectory;
+        return directory;
     }
 
     public async Task Save(PageDocument doc)
     {
-        var pagesDirectory = CreatePagesDirectoryIfNotExists();
+        var pagesDirectory = CreateOutputDirectoryIfNotExists();
 
         // Timestamps
         var now = DateTime.UtcNow;

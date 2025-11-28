@@ -8,6 +8,7 @@
 
     <ItemGroup>
       <PackageReference Include="Markdig" Version="0.44.0" />
+      <PackageReference Include="Microsoft.Orleans.Server" Version="9.2.1" />
       <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="10.0.0-rc.1.25458.5" />
       <PackageReference Include="Sqids" Version="3.1.0" />
       <PackageReference Include="YamlDotNet" Version="16.3.0" />
