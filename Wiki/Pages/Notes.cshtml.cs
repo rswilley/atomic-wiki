@@ -1,8 +1,11 @@
-﻿namespace Wiki.Pages;
+﻿using Wiki.Grains.PageIndex;
+using Wiki.Models;
+
+namespace Wiki.Pages;
 
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
-public class NotesModel : PageModel
+public class NotesModel(IGrainFactory grainFactory) : PageModel
 {
     public string? Query { get; set; }
     public string? Category { get; set; }
@@ -41,7 +44,17 @@ public class NotesModel : PageModel
         //         n.Tags.Any(t => t.Equals(Tag, StringComparison.OrdinalIgnoreCase)));
         // }
 
-        Notes = [];
+        var pageIndexGrain = grainFactory.GetGrain<IPageIndexGrain>("index");
+        Notes = (await pageIndexGrain.GetByType(nameof(PageType.Note).ToLower())).Select(p => new NoteListItem
+        {
+            Title = p.Title,
+            Slug = "",
+            UpdatedAt = p.UpdatedAt,
+            Category = p.Category,
+            Excerpt = p.Excerpt,
+            Tags = p.Tags,
+            IsPinned = p.IsPinned
+        }).ToList();
     }
 }
 
@@ -52,7 +65,7 @@ public class NoteListItem
     public DateTime UpdatedAt { get; set; }
 
     public string? Category { get; set; }
-    public string? Summary { get; set; }
+    public string? Excerpt { get; set; }
 
     public IEnumerable<string>? Tags { get; set; }
     public bool IsPinned { get; set; }

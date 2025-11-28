@@ -73,14 +73,14 @@ public class MarkdownService : IMarkdownService
         }
 
         var parts = markdown.Split(["\n---", "\r\n---"], 3, StringSplitOptions.None);
-        if (parts.Length < 3)
+        if (parts.Length < 2)
         {
             return (new T(), "");
         }
 
         // Remove leading '---'
-        var yamlText = parts[0].TrimStart('-', ' ', '\r', '\n') + parts[1];
-        var markdownText = parts[2];
+        var yamlText = parts[0].TrimStart('-', ' ', '\r', '\n');
+        var markdownText = parts[1];
 
         var meta = _yamlDeserializer.Deserialize<T>(yamlText);
         var html = ToHtml(markdownText);
