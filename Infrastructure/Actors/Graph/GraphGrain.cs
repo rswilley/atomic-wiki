@@ -1,4 +1,7 @@
-﻿namespace Infrastructure.Actors.Graph;
+﻿using Infrastructure.Actors.Backlink;
+using Infrastructure.Actors.Page;
+
+namespace Infrastructure.Actors.Graph;
 
 [Alias("Actors.GraphGrain")]
 public interface IGraphGrain : IGrainWithGuidKey
@@ -7,12 +10,27 @@ public interface IGraphGrain : IGrainWithGuidKey
     Task<GraphNeighbors> GetNeighbors(string pageId);
 }
 
-public class GraphGrain(IGrainContext grainContext) : IGrainBase, IGraphGrain
+public class GraphGrain(
+    IGrainContext grainContext,
+    IGrainFactory grainFactory) : IGrainBase, IGraphGrain
 {
     public IGrainContext GrainContext { get; } = grainContext;
     
-    public Task<GraphNeighbors> GetNeighbors(string pageId)
+    public async Task<GraphNeighbors> GetNeighbors(string pageId)
     {
-        throw new NotImplementedException();
+        var pageGrain = grainFactory.GetGrain<IPageGrain>(pageId);
+        var backLinkGrain = grainFactory.GetGrain<IBacklinkGrain>(pageId);
+
+        var outgoingTask = pageGrain.GetOutgoingLinks();
+        var incomingTask = backLinkGrain.GetBacklinks();
+
+        await Task.WhenAll(outgoingTask, incomingTask);
+
+        var neighbors = new GraphNeighbors(
+            pageId,
+            outgoingTask.Result,
+            incomingTask.Result);
+        
+        return neighbors;
     }
 }
