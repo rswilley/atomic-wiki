@@ -1,5 +1,6 @@
-﻿using Wiki.Models;
-using Wiki.Services;
+﻿using Domain;
+using Domain.Enums;
+using Domain.Repositories;
 
 namespace Wiki.Grains.PageIndex;
 
@@ -16,8 +17,9 @@ public class PageIndexGrain(
         storageName: "local")]
     IPersistentState<NoteIndexState> profile,
     IGrainContext grainContext,
-    IPageStore pageStore,
-    IRenderService renderService) : IGrainBase, IPageIndexGrain
+    IPageRepository pageRepository,
+    IMarkdownParser markdownParser,
+    IIdService idService) : IGrainBase, IPageIndexGrain
 {
     public IGrainContext GrainContext { get; } = grainContext;
 
@@ -26,19 +28,20 @@ public class PageIndexGrain(
         var firstBoot = profile.State.LastIndexDate == null;
         if (firstBoot)
         {
-            var allPages = await pageStore.GetAll();
-            foreach (var page in allPages)
+            var allContent = await pageRepository.GetAll();
+            foreach (var content in allContent)
             {
-                profile.State.Pages.Add(page.Meta.PermanentId, new NoteIndexEntry
+                var page = new WikiPage(new WikiContent(content, markdownParser), idService);
+                profile.State.Pages.Add(page.Id, new NoteIndexEntry
                 {
-                    Title = page.Meta.Title,
-                    Type = page.Meta.Type.ToLower(),
-                    CreatedAt = page.Meta.CreatedAt ?? DateTime.UtcNow,
-                    UpdatedAt = page.Meta.UpdatedAt ?? DateTime.UtcNow,
-                    Category = page.Meta.Category,
-                    Tags = page.Meta.Tags ?? [],
-                    IsPinned = page.Meta.Pinned ?? false,
-                    Excerpt = renderService.GetExcerpt(page.Html)
+                    Title = page.Content.FrontMatter.Title,
+                    Type = page.Content.FrontMatter.Type.ToLower(),
+                    CreatedAt = page.Content.FrontMatter.CreatedAt ?? DateTime.UtcNow,
+                    UpdatedAt = page.Content.FrontMatter.UpdatedAt ?? DateTime.UtcNow,
+                    Category = page.Content.FrontMatter.Category,
+                    Tags = page.Content.FrontMatter.Tags ?? [],
+                    IsPinned = page.Content.FrontMatter.Pinned ?? false,
+                    Excerpt = page.Content.GetExcerpt()
                 });
             }
             

@@ -1,5 +1,12 @@
+using Domain;
+using Domain.Repositories;
+using Infrastructure;
+using Infrastructure.Repositories;
+using Infrastructure.Services;
 using Wiki.Grains.Extensions;
 using Wiki.Services;
+using ISearchRepository = Infrastructure.Repositories.ISearchRepository;
+using MarkdownParser = Infrastructure.MarkdownParser;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,13 +24,12 @@ builder.Host.UseOrleans(siloBuilder =>
 
 // Add services to the container.
 builder.Services.AddScoped<IConfigurationService, ConfigurationService>();
-builder.Services.AddScoped<IPageStore, FilePageStore>();
+builder.Services.AddScoped<IPageRepository, PageRepository>();
 builder.Services.AddScoped<IPageService, PageService>();
-builder.Services.AddScoped<IIdService, IdService>();
-builder.Services.AddScoped<IMarkdownService, MarkdownService>();
-builder.Services.AddScoped<IRenderService, RenderService>();
+builder.Services.AddScoped<IIdService, SquidIdService>();
+builder.Services.AddScoped<IMarkdownParser, MarkdownParser>();
 builder.Services.AddScoped<ISearchService, SearchService>();
-builder.Services.AddScoped<ISearchStore, LuceneStore>();
+builder.Services.AddScoped<ISearchRepository, LuceneRepository>();
 builder.Services.AddRazorPages();
 
 var app = builder.Build();

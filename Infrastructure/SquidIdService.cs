@@ -1,13 +1,9 @@
-﻿using Sqids;
+﻿using Domain;
+using Sqids;
 
-namespace Wiki.Services;
+namespace Infrastructure;
 
-public interface IIdService
-{
-    string Generate(long number);
-}
-
-public class IdService : IIdService
+public class SquidIdService : IIdService
 {
     private readonly SqidsEncoder<long> _squid = new(new SqidsOptions
     {

@@ -1,0 +1,45 @@
+﻿using System.Text;
+using Domain;
+using Domain.Extensions;
+using Domain.Repositories;
+
+namespace Infrastructure.Repositories;
+
+public class PageRepository(IConfigurationService configurationService) : IPageRepository
+{
+    public async Task<List<string>> GetAll()
+    {
+        var contentList = new List<string>();
+        var outputDirectory = CreateOutputDirectoryIfNotExists();
+        
+        foreach (var file in Directory.GetFiles(outputDirectory, "*.md", SearchOption.TopDirectoryOnly))
+        {
+            var content = await File.ReadAllTextAsync(file, Encoding.UTF8);
+            contentList.Add(content);
+        }
+
+        return contentList;
+    }
+
+    private string CreateOutputDirectoryIfNotExists()
+    {
+        var directory = Path.Combine(configurationService.GetDataDirectory(), "output");
+        if (!Directory.Exists(directory))
+        {
+            Directory.CreateDirectory(directory);
+        }
+
+        return directory;
+    }
+
+    public async Task Save(string markdown, string title, string permanentId)
+    {
+        var pagesDirectory = CreateOutputDirectoryIfNotExists();
+        var fileName = $"{title.ToSlug()}-{permanentId}.md";
+        var filePath = Path.Combine(pagesDirectory, fileName);
+        var tempPath = filePath + ".tmp";
+
+        await File.WriteAllTextAsync(tempPath, markdown, Encoding.UTF8);
+        File.Move(tempPath, filePath, overwrite: true);
+    }
+}

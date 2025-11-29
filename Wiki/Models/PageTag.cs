@@ -13,5 +13,4 @@ public class PageTag
     public string Slug { get; set; } = "";
 
     public Guid ExternalId { get; set; } = Guid.NewGuid();
-    public ICollection<Page> Pages { get; set; } = new List<Page>();
 }

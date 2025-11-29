@@ -1,4 +1,4 @@
-﻿namespace Wiki.Extensions;
+﻿namespace Domain.Extensions;
 
 public static class StringExtensions
 {

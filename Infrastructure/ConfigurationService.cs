@@ -1,16 +1,13 @@
-﻿namespace Wiki.Services;
+﻿using Domain;
+using Microsoft.Extensions.Configuration;
 
-public interface IConfigurationService
-{
-    string GetDataDirectory();
-    string GetSearchIndexDirectory();
-}
+namespace Infrastructure.Services;
 
 public class ConfigurationService(IConfiguration configuration) : IConfigurationService
 {
     public string GetDataDirectory()
     {
-        var directory = configuration.GetValue<string>("DATA_DIRECTORY");
+        var directory = configuration["DATA_DIRECTORY"];
         ArgumentException.ThrowIfNullOrEmpty(directory);
         return directory;
     }

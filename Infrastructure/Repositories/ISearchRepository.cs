@@ -1,4 +1,5 @@
-﻿using Lucene.Net.Analysis.Standard;
+﻿using Domain;
+using Lucene.Net.Analysis.Standard;
 using Lucene.Net.Documents;
 using Lucene.Net.Index;
 using Lucene.Net.QueryParsers.Classic;
@@ -9,9 +10,9 @@ using Lucene.Net.Util;
 using LuceneDirectory = Lucene.Net.Store.Directory;
 using OpenMode = Lucene.Net.Index.OpenMode;
 
-namespace Wiki.Services;
+namespace Infrastructure.Repositories;
 
-public interface ISearchStore
+public interface ISearchRepository
 {
     void Create(PageSearchItem item);
     void Update(PageSearchItem item);
@@ -19,7 +20,7 @@ public interface ISearchStore
     SearchResult Search(string searchQuery);
 }
 
-public class LuceneStore(IConfigurationService configurationService) : ISearchStore
+public class LuceneRepository(IConfigurationService configurationService) : ISearchRepository
 {
     private readonly string _indexPath = configurationService.GetSearchIndexDirectory();
     private readonly LuceneVersion _luceneVersion = LuceneVersion.LUCENE_48;

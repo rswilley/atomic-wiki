@@ -17,7 +17,4 @@ public class PageCategory
     public DateTime? LastUpdated { get; set; }
 
     public Guid ExternalId { get; set; } = Guid.NewGuid();
-    
-    // Navigation: one Category → many Pages
-    public ICollection<Page> Pages { get; set; } = new List<Page>();
 }

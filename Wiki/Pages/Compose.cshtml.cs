@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using Domain.Enums;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Wiki.Grains.Page;
 using Wiki.Models;
 using Wiki.Services;
 
