@@ -1,5 +1,8 @@
-﻿using Wiki.Models;
-using Wiki.Services;
+﻿using System.Text;
+using Domain;
+using Domain.Enums;
+using Domain.Repositories;
+using Infrastructure.Repositories;
 
 namespace Wiki.Grains.Page;
 
@@ -7,7 +10,7 @@ namespace Wiki.Grains.Page;
 public interface IPageGrain : IGrainWithStringKey
 {
     [Alias("CreatePage")]
-    Task CreatePage(PageWriteModel page);
+    Task CreatePage(ContentFrontMatter frontMatter, string markdownBody);
 }
 
 public class PageGrain(
@@ -16,73 +19,54 @@ public class PageGrain(
         storageName: "local")]
     IPersistentState<PageGrainState> profile,
     IGrainContext grainContext,
-    IPageStore pageStore,
-    ISearchStore searchStore,
-    IMarkdownService markdownService)
+    IPageRepository pageRepository,
+    ISearchRepository searchRepository,
+    IMarkdownParser markdownParser)
     : IGrainBase, IPageGrain
 {
     public IGrainContext GrainContext { get; } = grainContext;
 
-    public async Task CreatePage(PageWriteModel page)
+    public async Task CreatePage(ContentFrontMatter frontMatter, string markdownBody)
     {
         var permanentId = this.GetPrimaryKeyString();
-        var title = markdownService.GetFirstHeader(page.Markdown) ?? "Untitled";
-        var tags = GetTags(page.Tags);
+        var fullMarkdown = markdownParser.Serialize(frontMatter, markdownBody);
+        var page = new WikiPage(new WikiContent(fullMarkdown, markdownParser), null!);
         
-        await SavePageDocument(page, permanentId, title, tags);
-        SaveSearchIndex(page, permanentId, title, tags);
-        await UpdateState(page, permanentId, title, tags);
+        await SavePageDocument(page, permanentId);
+        SaveSearchIndex(page, permanentId);
+        await UpdateState(page, permanentId);
     }
 
-    private async Task UpdateState(PageWriteModel page, string permanentId, string title, List<string> tags)
+    private async Task UpdateState(WikiPage page, string permanentId)
     {
         profile.State.PermanentId = permanentId;
-        profile.State.Title = title;
-        profile.State.Type = page.Type;
-        profile.State.Markdown = page.Markdown;
-        profile.State.Category = page.Category;
-        profile.State.Tags = tags;
-        profile.State.IsPinned = page.IsPinned;
-        profile.State.CreatedAtUtc = page.CreatedAt ?? DateTime.UtcNow;
-        profile.State.UpdatedAtUtc = DateTime.UtcNow;
+        profile.State.Title = page.Content.FrontMatter.Title;
+        profile.State.Type = page.Content.FrontMatter.Type;
+        profile.State.Markdown = page.Content.Value;
+        profile.State.Category = page.Content.FrontMatter.Category;
+        profile.State.Tags = page.Content.FrontMatter.Tags?.ToHashSet() ?? [];
+        profile.State.IsPinned = page.Content.FrontMatter.Pinned ?? false;
+        profile.State.OutgoingLinks = page.Content.GetOutgoingLinks().ToHashSet();
+        profile.State.CreatedAtUtc = page.Content.FrontMatter.CreatedAt ?? DateTime.UtcNow;
+        profile.State.UpdatedAtUtc = page.Content.FrontMatter.UpdatedAt ?? DateTime.UtcNow;
         
         await profile.WriteStateAsync();
     }
 
-    private void SaveSearchIndex(PageWriteModel page, string permanentId, string title, List<string> tags)
+    private void SaveSearchIndex(WikiPage page, string permanentId)
     {
-        searchStore.Create(new PageSearchItem
+        searchRepository.Create(new PageSearchItem
         {
             PermanentId = permanentId,
-            Title = title,
-            Body = page.Markdown,
-            Tags = tags
+            Title = page.Content.FrontMatter.Title,
+            Body = page.Content.Value,
+            Tags = page.Content.FrontMatter.Tags?.ToList() ?? []
         });
     }
 
-    private async Task SavePageDocument(PageWriteModel page, string permanentId, string title, List<string> tags)
+    private async Task SavePageDocument(WikiPage page, string permanentId)
     {
-        await pageStore.Save(new PageDocument
-        {
-            Meta = new PageFrontMatter
-            {
-                PermanentId = permanentId,
-                Title = title,
-                Type = page.Type,
-                Category = page.Category,
-                Tags = tags,
-                Pinned = page.IsPinned,
-                CreatedAt = page.CreatedAt
-            },
-            Markdown = page.Markdown
-        });
-    }
-
-    private static List<string> GetTags(string? tags)
-    {
-        return string.IsNullOrEmpty(tags) 
-            ? [] 
-            : tags.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries).ToList();
+        await pageRepository.Save(page.Content.Value, page.Content.FrontMatter.Title, permanentId);
     }
 }
 
@@ -93,8 +77,8 @@ public class PageGrainState
     public string Type { get; set; } = nameof(PageType.Note).ToLower();
     public string Markdown { get; set; } = "";
     public string? Category { get; set; } = "";
-    public List<string> Tags { get; set; } = [];
-    public List<string> OutgoingLinks { get; set; } = [];
+    public HashSet<string> Tags { get; set; } = [];
+    public HashSet<string> OutgoingLinks { get; set; } = [];
     public bool IsPinned { get; set; }
     public DateTime CreatedAtUtc { get; set; }
     public DateTime UpdatedAtUtc { get; set; }

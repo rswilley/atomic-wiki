@@ -1,4 +1,5 @@
-﻿using Wiki.Grains.PageIndex;
+﻿using Domain.Enums;
+using Wiki.Grains.PageIndex;
 using Wiki.Models;
 
 namespace Wiki.Pages;

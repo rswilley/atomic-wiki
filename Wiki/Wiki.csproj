@@ -7,15 +7,13 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="Markdig" Version="0.44.0" />
       <PackageReference Include="Microsoft.Orleans.Server" Version="9.2.1" />
       <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="10.0.0-rc.1.25458.5" />
-      <PackageReference Include="Sqids" Version="3.1.0" />
-      <PackageReference Include="YamlDotNet" Version="16.3.0" />
-      <PackageReference Include="Lucene.Net" Version="4.8.0-beta00017" />
-      <PackageReference Include="Lucene.Net.Analysis.Common" Version="4.8.0-beta00017" />
-      <PackageReference Include="Lucene.Net.Highlighter" Version="4.8.0-beta00017" />
-      <PackageReference Include="Lucene.Net.QueryParser" Version="4.8.0-beta00017" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Domain\Domain.csproj" />
+      <ProjectReference Include="..\Infrastructure\Infrastructure.csproj" />
     </ItemGroup>
 
 </Project>

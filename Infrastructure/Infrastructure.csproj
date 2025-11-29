@@ -1,0 +1,24 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Domain\Domain.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Markdig" Version="0.44.0" />
+      <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="10.0.0" />
+        <PackageReference Include="YamlDotNet" Version="16.3.0" />
+        <PackageReference Include="Sqids" Version="3.1.0" />
+        <PackageReference Include="Lucene.Net" Version="4.8.0-beta00017" />
+        <PackageReference Include="Lucene.Net.Analysis.Common" Version="4.8.0-beta00017" />
+        <PackageReference Include="Lucene.Net.Highlighter" Version="4.8.0-beta00017" />
+        <PackageReference Include="Lucene.Net.QueryParser" Version="4.8.0-beta00017" />
+    </ItemGroup>
+
+</Project>
