@@ -3,9 +3,9 @@ using Domain.Enums;
 using Domain.Repositories;
 using Infrastructure.Repositories;
 
-namespace Wiki.Grains.Page;
+namespace Infrastructure.Actors.Page;
 
-[Alias("PageGrain")]
+[Alias("Actors.PageGrain")]
 public interface IPageGrain : IGrainWithStringKey
 {
     [Alias("CreatePage")]
