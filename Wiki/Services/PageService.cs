@@ -1,5 +1,5 @@
 ﻿using Domain;
-using Wiki.Grains.Page;
+using Infrastructure.Actors.Page;
 using Wiki.Models;
 
 namespace Wiki.Services;
