@@ -1,8 +1,9 @@
 ﻿using System.Text.Json;
+using Infrastructure.Extensions;
+using Microsoft.Extensions.Logging;
 using Orleans.Storage;
-using Wiki.Grains.Extensions;
 
-namespace Wiki.Grains;
+namespace Infrastructure.Actors;
 
 public class LocalFileStorageProvider(
     LocalFileStorageOptions options,

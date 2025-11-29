@@ -1,9 +1,11 @@
-﻿using Microsoft.Extensions.Options;
+﻿using Infrastructure.Actors;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using Orleans.Runtime.Hosting;
 
-namespace Wiki.Grains.Extensions;
+namespace Infrastructure.Extensions;
 
-public static class LocalFileStorageSiloBuilderExtensions
+public static class SiloBuilderExtensions
 {
     public static ISiloBuilder AddLocalFileGrainStorage(this ISiloBuilder builder, string name, Action<LocalFileStorageOptions> configureOptions)
     {

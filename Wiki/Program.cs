@@ -1,9 +1,9 @@
 using Domain;
 using Domain.Repositories;
 using Infrastructure;
+using Infrastructure.Extensions;
 using Infrastructure.Repositories;
 using Infrastructure.Services;
-using Wiki.Grains.Extensions;
 using Wiki.Services;
 using ISearchRepository = Infrastructure.Repositories.ISearchRepository;
 using MarkdownParser = Infrastructure.MarkdownParser;
