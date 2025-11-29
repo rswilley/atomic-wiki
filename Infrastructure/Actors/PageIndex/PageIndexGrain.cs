@@ -2,9 +2,9 @@
 using Domain.Enums;
 using Domain.Repositories;
 
-namespace Wiki.Grains.PageIndex;
+namespace Infrastructure.Actors.PageIndex;
 
-[Alias("Wiki.Grains.PageIndex.IPageIndexGrain")]
+[Alias("Actors.PageIndex")]
 public interface IPageIndexGrain : IGrainWithStringKey
 {
     [Alias("GetByType")]

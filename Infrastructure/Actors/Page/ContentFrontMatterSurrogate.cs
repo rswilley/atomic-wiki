@@ -1,9 +1,9 @@
 ﻿using Domain;
 
-namespace Wiki.Grains.Page;
+namespace Infrastructure.Actors.Page;
 
 [GenerateSerializer]
-[Alias("Page.ContentFrontMatterSurrogate")]
+[Alias("Actors.Page.ContentFrontMatterSurrogate")]
 public struct ContentFrontMatterSurrogate
 {
     [Id(0)] public string? PermanentId;
