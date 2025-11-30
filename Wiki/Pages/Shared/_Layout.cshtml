@@ -40,9 +40,16 @@
             </div>
 
             <div class="d-flex align-items-center gap-2">
-                <a asp-page="/Notes" class="btn btn-sm btn-outline-secondary d-none d-sm-inline-flex">Notes</a>
-                <a asp-page="/Timeline" class="btn btn-sm btn-outline-secondary d-none d-sm-inline-flex">Timeline</a>
-                <a asp-page="/NewNote" class="btn btn-sm btn-primary">New Note</a>
+                <div class="dropdown">
+                    <button class="btn btn-sm btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        Compose
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li><a asp-page="/Compose" asp-route-type="note" class="dropdown-item">Note</a></li>
+                        <li><a asp-page="/Compose" asp-route-type="post" class="dropdown-item">Post</a></li>
+                        <li><a asp-page="/Compose" asp-route-type="journal" class="dropdown-item">Journal Entry</a></li>
+                    </ul>
+                </div>
             </div>
         </header>
 

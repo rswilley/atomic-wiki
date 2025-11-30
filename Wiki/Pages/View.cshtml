@@ -188,7 +188,8 @@ else
                 <!-- Actions -->
                 <div class="card">
                     <div class="card-body py-2 px-3 d-grid gap-2">
-                        <a asp-page="/PageEdit"
+                        <a asp-page="/Compose" 
+                           asp-route-type="@Model.Type"
                            asp-route-slug="@Model.Slug"
                            class="btn btn-sm btn-primary">
                             Edit

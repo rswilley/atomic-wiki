@@ -59,8 +59,9 @@
         <section class="mb-3">
             <h2 class="h6 text-muted mb-2">Quick Actions</h2>
             <div class="d-grid gap-2">
-                <a asp-page="/NewNote" class="btn btn-sm btn-primary">New Note</a>
-                <a asp-page="/NewPost" class="btn btn-sm btn-outline-secondary">New Journal Entry</a>
+                <a asp-page="/Compose" asp-route-type="note" class="btn btn-sm btn-primary">New Note</a>
+                <a asp-page="/Compose" asp-route-type="post" class="btn btn-sm btn-outline-secondary">New Post</a>
+                <a asp-page="/Compose" asp-route-type="journal" class="btn btn-sm btn-outline-secondary">New Journal Entry</a>
             </div>
         </section>
 

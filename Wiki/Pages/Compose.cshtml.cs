@@ -1,19 +1,21 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using Domain.Enums;
+using Domain.ValueObject;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
 using Wiki.Models;
 using Wiki.Services;
 
 namespace Wiki.Pages;
 
-public class ComposeModel(IPageService pageService) : PageModel
+public class ComposeModel(IPageService pageService) : Microsoft.AspNetCore.Mvc.RazorPages.PageModel
 {
     private static readonly string[] AllowedTypes = [
         nameof(PageType.Note).ToLower(), 
         nameof(PageType.Post).ToLower(), 
         nameof(PageType.Journal).ToLower()
     ];
+    
+    public string? Slug { get; set; } = "";
 
     [BindProperty]
     [Required]
@@ -39,8 +41,9 @@ public class ComposeModel(IPageService pageService) : PageModel
     [BindProperty]
     public bool IsPinned { get; set; }
 
-    public void OnGet(string? type)
+    public async Task<IActionResult> OnGetAsync(string? type, string? slug)
     {
+        Slug = slug;
         if (!string.IsNullOrWhiteSpace(type) &&
             AllowedTypes.Contains(type.ToLowerInvariant()))
         {
@@ -55,9 +58,39 @@ public class ComposeModel(IPageService pageService) : PageModel
         {
             JournalDate ??= DateTime.Today;
         }
+
+        if (!string.IsNullOrWhiteSpace(Slug))
+        {
+            var page = await pageService.GetPage(Slug);
+            if (page != null)
+            {
+                Type = page.Content.FrontMatter.Type;
+                JournalDate = Type == nameof(PageType.Journal).ToLower() ? page.Content.FrontMatter.CreatedAt! : null;
+                Markdown = page.Content.MarkdownBody;
+                Category = page.Content.FrontMatter.Category;
+                Tags = string.Join(',', page.Content.FrontMatter.Tags ?? []);
+                IsPinned = page.Content.FrontMatter.Pinned ?? false;
+            }
+            else
+            {
+                return RedirectToPage("View", new { slug = Slug });
+            }
+        }
+
+        return Page();
+    }
+    
+    public IActionResult OnGetCancel(string type, string slug)
+    {
+        if (string.IsNullOrEmpty(slug))
+        {
+            return RedirectBasedOnType(type);   
+        }
+        
+        return RedirectToPage("View", new { slug });
     }
 
-    public async Task<IActionResult> OnPostAsync()
+    public async Task<IActionResult> OnPostAsync(string slug)
     {
         // Normalize type
         if (!AllowedTypes.Contains(Type?.ToLowerInvariant() ?? ""))
@@ -84,37 +117,60 @@ public class ComposeModel(IPageService pageService) : PageModel
             return Page();
         }
 
-        var page = new PageWriteModel
+        PageModelBase page;
+        if (string.IsNullOrEmpty(slug))
         {
-            Markdown = Markdown,
-            Type = Type!,
-            IsPinned = Type != nameof(PageType.Journal).ToLower() && IsPinned,
-            Category = Category,
-            Tags = Tags
-        };
+            page = new PageWriteModel
+            {
+                Markdown = Markdown,
+                Type = Type!,
+                IsPinned = Type != nameof(PageType.Journal).ToLower() && IsPinned,
+                Category = Category,
+                Tags = Tags
+            };   
+        }
+        else
+        {
+            page = new PageUpdateModel
+            {
+                Slug = new Slug(slug),
+                Markdown = Markdown,
+                Type = Type!,
+                IsPinned = Type != nameof(PageType.Journal).ToLower() && IsPinned,
+                Category = Category,
+                Tags = Tags
+            };
+        }
 
         if (Type == nameof(PageType.Journal).ToLower())
         {
             page.CreatedAt = JournalDate;
         }
-        
-        await pageService.Save(page);
-        return RedirectBasedOnType();
+
+        if (string.IsNullOrEmpty(slug))
+        {
+            await pageService.Save((PageWriteModel)page);   
+        }
+        else
+        {
+            await pageService.Update((PageUpdateModel)page);
+        }
+        return RedirectBasedOnType(Type!);
     }
     
-    private RedirectToPageResult RedirectBasedOnType()
+    private RedirectToPageResult RedirectBasedOnType(string type)
     {
-        if (Type.Equals(nameof(PageType.Journal), StringComparison.CurrentCultureIgnoreCase))
+        if (type.Equals(nameof(PageType.Journal), StringComparison.CurrentCultureIgnoreCase))
         {
             return RedirectToPage("/Journal");
         }
 
-        if (Type.Equals(nameof(PageType.Post), StringComparison.CurrentCultureIgnoreCase))
+        if (type.Equals(nameof(PageType.Post), StringComparison.CurrentCultureIgnoreCase))
         {
             return RedirectToPage("/Posts");
         }
 
-        if (Type.Equals(nameof(PageType.Note), StringComparison.CurrentCultureIgnoreCase))
+        if (type.Equals(nameof(PageType.Note), StringComparison.CurrentCultureIgnoreCase))
         {
             return RedirectToPage("/Notes");
         }

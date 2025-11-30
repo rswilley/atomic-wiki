@@ -1,14 +1,12 @@
-﻿using Domain;
-using Domain.Extensions;
-using Infrastructure.Actors.Page;
+﻿using Domain.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Wiki.Services;
 
 namespace Wiki.Pages;
 
 public class PageViewModel(
-    IGrainFactory grainFactory,
-    IMarkdownParser markdownParser) : PageModel
+    IPageService pageService) : PageModel
 {
     [FromRoute]
     public string Slug { get; set; } = "";
@@ -34,16 +32,13 @@ public class PageViewModel(
 
     public async Task OnGetAsync()
     {
-        var pageGrain = grainFactory.GetGrain<IPageGrain>(Slug);
-        var markdown = await pageGrain.GetContent();
+        var page = await pageService.GetPage(Slug);
         
-        if (string.IsNullOrWhiteSpace(markdown))
+        if (page == null)
         {
             NotFound = true;
             return;
         }
-
-        var page = new WikiPage(new WikiContent(markdown, markdownParser), null!);
 
         Title = page.Content.FrontMatter.Title;
         Type = page.Content.FrontMatter.Type;

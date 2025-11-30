@@ -1,18 +1,23 @@
 ﻿using System.Text;
 using Domain;
-using Domain.Extensions;
 using Domain.Repositories;
 
 namespace Infrastructure.Repositories;
 
 public class PageRepository(IConfigurationService configurationService) : IPageRepository
 {
-    public async Task<string> Get(string slug)
+    public async Task<string> Get(string id)
     {
         var outputDirectory = CreateOutputDirectoryIfNotExists();
-        var filePath = Path.Combine(outputDirectory, $"{slug}.md");
-        if (File.Exists(filePath)) 
-            return await File.ReadAllTextAsync(filePath, Encoding.UTF8);
+        
+        foreach (var file in Directory.GetFiles(outputDirectory, "*.md", SearchOption.TopDirectoryOnly))
+        {
+            if (file.EndsWith(id + ".md"))
+            {
+                var filePath = Path.Combine(outputDirectory, file);
+                return await File.ReadAllTextAsync(filePath, Encoding.UTF8); 
+            }
+        }
 
         return string.Empty;
     }
@@ -42,14 +47,21 @@ public class PageRepository(IConfigurationService configurationService) : IPageR
         return directory;
     }
 
-    public async Task Save(string markdown, string title, string permanentId)
+    public async Task Save(string markdown, string fileName)
     {
         var pagesDirectory = CreateOutputDirectoryIfNotExists();
-        var fileName = $"{title.ToSlug()}-{permanentId}.md";
         var filePath = Path.Combine(pagesDirectory, fileName);
         var tempPath = filePath + ".tmp";
 
         await File.WriteAllTextAsync(tempPath, markdown, Encoding.UTF8);
         File.Move(tempPath, filePath, overwrite: true);
+    }
+
+    public Task Delete(string fileName)
+    {
+        var pagesDirectory = CreateOutputDirectoryIfNotExists();
+        var filePath = Path.Combine(pagesDirectory, fileName);
+        File.Delete(filePath);
+        return Task.CompletedTask;
     }
 }
