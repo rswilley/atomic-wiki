@@ -1,9 +1,14 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Domain;
+using Domain.Extensions;
+using Infrastructure.Actors.Page;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace Wiki.Pages.Page;
+namespace Wiki.Pages;
 
-public class PageViewModel : PageModel
+public class PageViewModel(
+    IGrainFactory grainFactory,
+    IMarkdownParser markdownParser) : PageModel
 {
     [FromRoute]
     public string Slug { get; set; } = "";
@@ -15,7 +20,7 @@ public class PageViewModel : PageModel
     public string Type { get; set; } = "note"; // note | post | journal
     public bool IsPinned { get; set; }
 
-    public string? Summary { get; set; }
+    public string? Excerpt { get; set; }
     public string? Content { get; set; }
     public string? RenderedContent { get; set; }
 
@@ -27,41 +32,37 @@ public class PageViewModel : PageModel
     public DateTime? CreatedAt { get; set; }
     public DateTime? UpdatedAt { get; set; }
 
-    // Journal-specific
-    public DateTime? JournalDate { get; set; }
-    public TimeSpan? JournalTime { get; set; }
-
-    public void OnGet()
+    public async Task OnGetAsync()
     {
-        // TODO: Replace with EF/SQLite lookup like:
-        // var entity = _db.Pages.Include(p => p.Tags).FirstOrDefault(p => p.Slug == Slug);
-        var sample = GetSamplePages().FirstOrDefault(p =>
-            p.Slug.Equals(Slug, StringComparison.OrdinalIgnoreCase));
-
-        if (sample == null)
+        var pageGrain = grainFactory.GetGrain<IPageGrain>(Slug);
+        var markdown = await pageGrain.GetContent();
+        
+        if (string.IsNullOrWhiteSpace(markdown))
         {
             NotFound = true;
             return;
         }
 
-        Title = sample.Title;
-        Type = sample.Type;
-        IsPinned = sample.IsPinned;
-        Summary = sample.Summary;
-        Content = sample.Content;
+        var page = new WikiPage(new WikiContent(markdown, markdownParser), null!);
 
-        Category = sample.Category;
-        CategorySlug = sample.CategorySlug;
-        Tags = sample.Tags;
+        Title = page.Content.FrontMatter.Title;
+        Type = page.Content.FrontMatter.Type;
+        IsPinned = page.Content.FrontMatter.Pinned ?? false;
+        Excerpt = page.Content.GetExcerpt();
+        Content = page.Content.MarkdownBody;
 
-        CreatedAt = sample.CreatedAt;
-        UpdatedAt = sample.UpdatedAt;
+        Category = page.Content.FrontMatter.Category;
+        CategorySlug = page.Content.FrontMatter.Category?.ToSlug();
+        Tags = page.Content.FrontMatter.Tags?.Select(tag => new PageTag
+        {
+            Name = tag,
+            Slug = tag.ToSlug()
+        }).ToList() ?? [];
 
-        JournalDate = sample.JournalDate;
-        JournalTime = sample.JournalTime;
-
-        // TODO: plug in real Markdown renderer (Markdig, etc.)
-        RenderedContent = RenderMarkdown(Content ?? "");
+        CreatedAt = page.Content.FrontMatter.CreatedAt;
+        UpdatedAt = page.Content.FrontMatter.UpdatedAt;
+        
+        RenderedContent = page.Content.RemoveTitleFromHtml();
     }
 
     // Stub: sample data

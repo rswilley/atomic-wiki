@@ -7,6 +7,16 @@ namespace Infrastructure.Repositories;
 
 public class PageRepository(IConfigurationService configurationService) : IPageRepository
 {
+    public async Task<string> Get(string slug)
+    {
+        var outputDirectory = CreateOutputDirectoryIfNotExists();
+        var filePath = Path.Combine(outputDirectory, $"{slug}.md");
+        if (File.Exists(filePath)) 
+            return await File.ReadAllTextAsync(filePath, Encoding.UTF8);
+
+        return string.Empty;
+    }
+
     public async Task<List<string>> GetAll()
     {
         var contentList = new List<string>();

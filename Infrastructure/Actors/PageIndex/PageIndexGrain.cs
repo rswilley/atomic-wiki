@@ -8,7 +8,10 @@ namespace Infrastructure.Actors.PageIndex;
 public interface IPageIndexGrain : IGrainWithStringKey
 {
     [Alias("GetByType")]
-    Task<List<NoteIndexEntry>> GetByType(string type);
+    Task<List<PageIndexEntry>> GetByType(string type);
+
+    [Alias("AddToIndex")]
+    Task AddToIndex(PageIndexEntry entry);
 }
 
 public class PageIndexGrain(
@@ -32,8 +35,9 @@ public class PageIndexGrain(
             foreach (var content in allContent)
             {
                 var page = new WikiPage(new WikiContent(content, markdownParser), idService);
-                profile.State.Pages.Add(page.Id, new NoteIndexEntry
+                profile.State.Pages.Add(page.Id, new PageIndexEntry
                 {
+                    Id = page.Id,
                     Title = page.Content.FrontMatter.Title,
                     Type = page.Content.FrontMatter.Type.ToLower(),
                     CreatedAt = page.Content.FrontMatter.CreatedAt ?? DateTime.UtcNow,
@@ -50,7 +54,7 @@ public class PageIndexGrain(
         }
     }
     
-    public Task<List<NoteIndexEntry>> GetByType(string type)
+    public Task<List<PageIndexEntry>> GetByType(string type)
     {
         var results = profile.State.Pages.Values
             .Where(e => string.Equals(e.Type, type, StringComparison.OrdinalIgnoreCase))
@@ -58,33 +62,41 @@ public class PageIndexGrain(
             .ToList();
         return Task.FromResult(results);
     }
+
+    public Task AddToIndex(PageIndexEntry entry)
+    {
+        profile.State.Pages.Add(entry.Id, entry);
+        return Task.CompletedTask;
+    }
 }
 
 [GenerateSerializer]
-[Alias("Wiki.Grains.PageIndex.NoteIndexEntry")]
-public class NoteIndexEntry
+[Alias("Actors.PageIndex.PageIndexEntry")]
+public class PageIndexEntry
 {
     [Id(0)]
-    public required string Title { get; set; } = "";
+    public required string Id { get; set; }
     [Id(1)]
-    public required  string Type { get; set; } = nameof(PageType.Note).ToLower();
+    public required string Title { get; set; } = "";
     [Id(2)]
-    public required DateTime CreatedAt { get; set; }
+    public required  string Type { get; set; } = nameof(PageType.Note).ToLower();
     [Id(3)]
-    public required DateTime UpdatedAt { get; set; }
+    public required DateTime CreatedAt { get; set; }
     [Id(4)]
-    public string? Category { get; set; }
+    public required DateTime UpdatedAt { get; set; }
     [Id(5)]
-    public required List<string> Tags { get; set; } = [];
+    public string? Category { get; set; }
     [Id(6)]
-    public required bool IsPinned { get; set; }
+    public required List<string> Tags { get; set; } = [];
     [Id(7)]
+    public required bool IsPinned { get; set; }
+    [Id(8)]
     public required string Excerpt { get; set; } = "";
 }
 
 public class NoteIndexState
 {
-    // permanentId -> post
-    public Dictionary<string, NoteIndexEntry> Pages { get; set; } = [];
+    // permanentId -> page
+    public Dictionary<string, PageIndexEntry> Pages { get; set; } = [];
     public DateTime? LastIndexDate { get; set; }
 }
