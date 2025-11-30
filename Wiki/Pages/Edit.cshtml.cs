@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace Wiki.Pages.Page;
+namespace Wiki.Pages;
 
 public class PageEditModel : PageModel
 {

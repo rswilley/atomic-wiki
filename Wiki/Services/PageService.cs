@@ -1,4 +1,5 @@
 ﻿using Domain;
+using Domain.Extensions;
 using Infrastructure.Actors.Page;
 using Wiki.Models;
 
@@ -30,7 +31,7 @@ public class PageService(
             UpdatedAt = DateTime.UtcNow
         };
         
-        var pageGrain = grainFactory.GetGrain<IPageGrain>(permanentId);
+        var pageGrain = grainFactory.GetGrain<IPageGrain>($"{frontMatter.Title.ToSlug()}-{permanentId}");
         await pageGrain.CreatePage(frontMatter, wikiContent.MarkdownBody);
         return permanentId;
     }

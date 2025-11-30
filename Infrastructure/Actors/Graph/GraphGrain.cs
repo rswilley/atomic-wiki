@@ -7,7 +7,7 @@ namespace Infrastructure.Actors.Graph;
 public interface IGraphGrain : IGrainWithGuidKey
 {
     [Alias("GetNeighbors")]
-    Task<GraphNeighbors> GetNeighbors(string pageId);
+    Task<GraphNeighbors> GetNeighbors(string slug);
 }
 
 public class GraphGrain(
@@ -16,10 +16,10 @@ public class GraphGrain(
 {
     public IGrainContext GrainContext { get; } = grainContext;
     
-    public async Task<GraphNeighbors> GetNeighbors(string pageId)
+    public async Task<GraphNeighbors> GetNeighbors(string slug)
     {
-        var pageGrain = grainFactory.GetGrain<IPageGrain>(pageId);
-        var backLinkGrain = grainFactory.GetGrain<IBacklinkGrain>(pageId);
+        var pageGrain = grainFactory.GetGrain<IPageGrain>(slug);
+        var backLinkGrain = grainFactory.GetGrain<IBacklinkGrain>(slug);
 
         var outgoingTask = pageGrain.GetOutgoingLinks();
         var incomingTask = backLinkGrain.GetBacklinks();
@@ -27,7 +27,7 @@ public class GraphGrain(
         await Task.WhenAll(outgoingTask, incomingTask);
 
         var neighbors = new GraphNeighbors(
-            pageId,
+            slug,
             outgoingTask.Result,
             incomingTask.Result);
         

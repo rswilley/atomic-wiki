@@ -95,7 +95,7 @@ public record WikiContent
         return htmlStripped;
     }
     
-    private string RemoveTitleFromHtml()
+    public string RemoveTitleFromHtml()
     {
         string pattern = @"<h1\b[^>]*>(.*?)<\/h1>";
         string title = "";

@@ -1,4 +1,5 @@
 ﻿using Domain.Enums;
+using Domain.Extensions;
 using Infrastructure.Actors.PageIndex;
 using Wiki.Models;
 
@@ -49,7 +50,7 @@ public class NotesModel(IGrainFactory grainFactory) : PageModel
         Notes = (await pageIndexGrain.GetByType(nameof(PageType.Note).ToLower())).Select(p => new NoteListItem
         {
             Title = p.Title,
-            Slug = "",
+            Slug = $"{p.Title.ToSlug()}-{p.Id}",
             UpdatedAt = p.UpdatedAt,
             Category = p.Category,
             Excerpt = p.Excerpt,
