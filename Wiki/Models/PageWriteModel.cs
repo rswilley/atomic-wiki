@@ -1,13 +1,21 @@
 ﻿using Domain.Enums;
+using Domain.ValueObject;
 
 namespace Wiki.Models;
 
-public class PageWriteModel
+public abstract class PageModelBase
 {
-    public string Type { get; set; } = nameof(PageType.Note).ToLower();
-    public string Markdown { get; set; } = "";
-    public string? Category { get; set; }
-    public string? Tags { get; set; }
-    public bool IsPinned { get; set; }
+    public string Type { get; init; } = nameof(PageType.Note).ToLower();
+    public string Markdown { get; init; } = "";
+    public string? Category { get; init; }
+    public string? Tags { get; init; }
+    public bool IsPinned { get; init; }
     public DateTime? CreatedAt { get; set; }
+}
+
+public class PageWriteModel : PageModelBase;
+
+public class PageUpdateModel : PageModelBase
+{
+    public required Slug Slug { get; init; }
 }

@@ -101,8 +101,18 @@
 
             <!-- Actions -->
             <div class="d-grid gap-2">
-                <button type="submit" class="btn btn-primary btn-sm">Save</button>
-                <a asp-page="/Index" class="btn btn-outline-secondary btn-sm">Cancel</a>
+                @if (string.IsNullOrEmpty(Model.Slug))
+                {
+                    <button type="submit" class="btn btn-primary btn-sm">Save</button>
+                }
+                else
+                {
+                    <button asp-route-slug="@Model.Slug" type="submit" class="btn btn-primary btn-sm">Update</button>
+                }
+                <a asp-page="/Compose"
+                   asp-route-type="@Model.Type"
+                   asp-route-slug="@Model.Slug"
+                   asp-page-handler="Cancel" class="btn btn-outline-secondary btn-sm">Cancel</a>
             </div>
         </div>
     </div>

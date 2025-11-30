@@ -55,7 +55,7 @@ public class MarkdownParser : IMarkdownParser
 
         // Remove leading '---'
         var yamlText = parts[0].TrimStart('-', ' ', '\r', '\n');
-        var markdownBody = parts[1];
+        var markdownBody = parts[1].TrimStart('\r', '\n');
 
         var meta = _yamlDeserializer.Deserialize<T>(yamlText);
         var html = ToHtml(markdownBody);

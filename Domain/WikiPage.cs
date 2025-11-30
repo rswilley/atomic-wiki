@@ -8,7 +8,8 @@ public class WikiPage(WikiContent content, IIdService idService)
 {
     public string Id { get; } = content.FrontMatter.PermanentId ?? idService.Generate(DateTime.UtcNow.Ticks);
     public string Slug { get; } = content.FrontMatter.Title?.ToSlug() ?? string.Empty;
-    public WikiContent Content { get; } = content;
+    public string FileName => $"{content.FrontMatter.Title?.ToSlug() ?? "Untitled"}-{Id}.md";
+    public WikiContent Content => content;
 }
 
 public record WikiContent

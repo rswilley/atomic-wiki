@@ -12,6 +12,9 @@ public interface IPageIndexGrain : IGrainWithStringKey
 
     [Alias("AddToIndex")]
     Task AddToIndex(PageIndexEntry entry);
+
+    [Alias("UpdateIndex")]
+    Task UpdateIndex(PageIndexEntry entry);
 }
 
 public class PageIndexGrain(
@@ -63,10 +66,16 @@ public class PageIndexGrain(
         return Task.FromResult(results);
     }
 
-    public Task AddToIndex(PageIndexEntry entry)
+    public async Task AddToIndex(PageIndexEntry entry)
     {
         profile.State.Pages.Add(entry.Id, entry);
-        return Task.CompletedTask;
+        await profile.WriteStateAsync();
+    }
+
+    public async Task UpdateIndex(PageIndexEntry entry)
+    {
+        profile.State.Pages[entry.Id] = entry;
+        await profile.WriteStateAsync();
     }
 }
 
