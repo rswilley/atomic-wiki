@@ -24,8 +24,7 @@ public class PageIndexGrain(
     IPersistentState<NoteIndexState> profile,
     IGrainContext grainContext,
     IPageRepository pageRepository,
-    IMarkdownParser markdownParser,
-    IIdService idService) : IGrainBase, IPageIndexGrain
+    IMarkdownParser markdownParser) : IGrainBase, IPageIndexGrain
 {
     public IGrainContext GrainContext { get; } = grainContext;
 
@@ -37,7 +36,7 @@ public class PageIndexGrain(
             var allContent = await pageRepository.GetAll();
             foreach (var content in allContent)
             {
-                var page = new WikiPage(new WikiContent(content, markdownParser), idService);
+                var page = new WikiPage(new WikiContent(content, markdownParser));
                 profile.State.Pages.Add(page.Id, new PageIndexEntry
                 {
                     Id = page.Id,
@@ -51,12 +50,12 @@ public class PageIndexGrain(
                     Excerpt = page.Content.GetExcerpt()
                 });
             }
-            
+
             profile.State.LastIndexDate = DateTime.UtcNow;
             await profile.WriteStateAsync(cancellationToke);
         }
     }
-    
+
     public Task<List<PageIndexEntry>> GetByType(string type)
     {
         var results = profile.State.Pages.Values

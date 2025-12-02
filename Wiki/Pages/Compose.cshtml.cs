@@ -1,6 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using Domain.Enums;
-using Domain.ValueObject;
 using Microsoft.AspNetCore.Mvc;
 using Wiki.Models;
 using Wiki.Services;
@@ -10,12 +9,13 @@ namespace Wiki.Pages;
 public class ComposeModel(IPageService pageService) : Microsoft.AspNetCore.Mvc.RazorPages.PageModel
 {
     private static readonly string[] AllowedTypes = [
-        nameof(PageType.Note).ToLower(), 
-        nameof(PageType.Post).ToLower(), 
+        nameof(PageType.Note).ToLower(),
+        nameof(PageType.Post).ToLower(),
         nameof(PageType.Journal).ToLower()
     ];
-    
-    public string? Slug { get; set; } = "";
+
+    [BindProperty(SupportsGet = true)]
+    public string? PermanentId { get; set; } = "";
 
     [BindProperty]
     [Required]
@@ -41,9 +41,9 @@ public class ComposeModel(IPageService pageService) : Microsoft.AspNetCore.Mvc.R
     [BindProperty]
     public bool IsPinned { get; set; }
 
-    public async Task<IActionResult> OnGetAsync(string? type, string? slug)
+    public async Task<IActionResult> OnGetAsync(string? type, string? permanentId)
     {
-        Slug = slug;
+        PermanentId = permanentId;
         if (!string.IsNullOrWhiteSpace(type) &&
             AllowedTypes.Contains(type.ToLowerInvariant()))
         {
@@ -59,13 +59,15 @@ public class ComposeModel(IPageService pageService) : Microsoft.AspNetCore.Mvc.R
             JournalDate ??= DateTime.Today;
         }
 
-        if (!string.IsNullOrWhiteSpace(Slug))
+        if (!string.IsNullOrWhiteSpace(PermanentId))
         {
-            var page = await pageService.GetPage(Slug);
+            var page = await pageService.GetPage(PermanentId);
             if (page != null)
             {
                 Type = page.Content.FrontMatter.Type;
-                JournalDate = Type == nameof(PageType.Journal).ToLower() ? page.Content.FrontMatter.CreatedAt! : null;
+                JournalDate = Type.Equals(nameof(PageType.Journal), StringComparison.CurrentCultureIgnoreCase)
+                    ? page.Content.FrontMatter.CreatedAt!
+                    : null;
                 Markdown = page.Content.MarkdownBody;
                 Category = page.Content.FrontMatter.Category;
                 Tags = string.Join(',', page.Content.FrontMatter.Tags ?? []);
@@ -73,27 +75,28 @@ public class ComposeModel(IPageService pageService) : Microsoft.AspNetCore.Mvc.R
             }
             else
             {
-                return RedirectToPage("View", new { slug = Slug });
+                return RedirectToPage("View");
             }
         }
 
         return Page();
     }
-    
+
     public IActionResult OnGetCancel(string type, string slug)
     {
         if (string.IsNullOrEmpty(slug))
         {
-            return RedirectBasedOnType(type);   
+            return RedirectBasedOnType(type);
         }
-        
+
         return RedirectToPage("View", new { slug });
     }
 
-    public async Task<IActionResult> OnPostAsync(string slug)
+    public async Task<IActionResult> OnPostAsync(string? permanentId)
     {
+        PermanentId = permanentId;
         // Normalize type
-        if (!AllowedTypes.Contains(Type?.ToLowerInvariant() ?? ""))
+        if (!AllowedTypes.Contains(Type.ToLowerInvariant()))
         {
             ModelState.AddModelError(nameof(Type), "Invalid entry type.");
         }
@@ -103,7 +106,7 @@ public class ComposeModel(IPageService pageService) : Microsoft.AspNetCore.Mvc.R
         }
 
         // Journal must have date
-        if (Type == nameof(PageType.Journal).ToLower() && !JournalDate.HasValue)
+        if (Type.Equals(nameof(PageType.Journal), StringComparison.CurrentCultureIgnoreCase) && !JournalDate.HasValue)
         {
             ModelState.AddModelError(nameof(JournalDate), "Journal entries require a date.");
         }
@@ -111,53 +114,55 @@ public class ComposeModel(IPageService pageService) : Microsoft.AspNetCore.Mvc.R
         if (!ModelState.IsValid)
         {
             // Ensure default date/time if coming back with errors
-            if (Type == nameof(PageType.Journal).ToLower() && !JournalDate.HasValue)
+            if (Type.Equals(nameof(PageType.Journal), StringComparison.CurrentCultureIgnoreCase) && !JournalDate.HasValue)
                 JournalDate = DateTime.Today;
 
             return Page();
         }
 
         PageModelBase page;
-        if (string.IsNullOrEmpty(slug))
+        var isPinned = !Type.Equals(nameof(PageType.Journal), StringComparison.CurrentCultureIgnoreCase) && IsPinned;
+
+        if (string.IsNullOrEmpty(PermanentId))
         {
             page = new PageWriteModel
             {
                 Markdown = Markdown,
-                Type = Type!,
-                IsPinned = Type != nameof(PageType.Journal).ToLower() && IsPinned,
+                Type = Type,
+                IsPinned = isPinned,
                 Category = Category,
                 Tags = Tags
-            };   
+            };
         }
         else
         {
             page = new PageUpdateModel
             {
-                Slug = new Slug(slug),
+                Id = PermanentId,
                 Markdown = Markdown,
-                Type = Type!,
-                IsPinned = Type != nameof(PageType.Journal).ToLower() && IsPinned,
+                Type = Type,
+                IsPinned = isPinned,
                 Category = Category,
                 Tags = Tags
             };
         }
 
-        if (Type == nameof(PageType.Journal).ToLower())
+        if (Type.Equals(nameof(PageType.Journal), StringComparison.CurrentCultureIgnoreCase))
         {
             page.CreatedAt = JournalDate;
         }
 
-        if (string.IsNullOrEmpty(slug))
+        if (string.IsNullOrEmpty(PermanentId))
         {
-            await pageService.Save((PageWriteModel)page);   
+            await pageService.Save((PageWriteModel)page);
         }
         else
         {
             await pageService.Update((PageUpdateModel)page);
         }
-        return RedirectBasedOnType(Type!);
+        return RedirectBasedOnType(Type);
     }
-    
+
     private RedirectToPageResult RedirectBasedOnType(string type)
     {
         if (type.Equals(nameof(PageType.Journal), StringComparison.CurrentCultureIgnoreCase))
@@ -174,7 +179,7 @@ public class ComposeModel(IPageService pageService) : Microsoft.AspNetCore.Mvc.R
         {
             return RedirectToPage("/Notes");
         }
-        
+
         return RedirectToPage("/Index");
     }
 }

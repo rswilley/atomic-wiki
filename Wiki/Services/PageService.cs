@@ -1,6 +1,4 @@
 ﻿using Domain;
-using Domain.Extensions;
-using Domain.ValueObject;
 using Infrastructure.Actors.Page;
 using Wiki.Models;
 
@@ -8,19 +6,17 @@ namespace Wiki.Services;
 
 public interface IPageService
 {
-    Task<WikiPage?> GetPage(string slug);
+    Task<WikiPage?> GetPage(string id);
     Task<string> Save(PageWriteModel model);
     Task<string> Update(PageUpdateModel model);
 }
 
 public class PageService(
-    IIdService idService,
     IMarkdownParser markdownParser,
     IGrainFactory grainFactory) : IPageService
 {
-    public async Task<WikiPage?> GetPage(string slug)
+    public async Task<WikiPage?> GetPage(string id)
     {
-        var id = new Slug(slug).PermanentId;
         var pageGrain = grainFactory.GetGrain<IPageGrain>(id);
         var markdown = await pageGrain.GetContent();
 
@@ -28,14 +24,14 @@ public class PageService(
         {
             return null;
         }
-        
-        var page = new WikiPage(new WikiContent(markdown, markdownParser), null!);
+
+        var page = new WikiPage(new WikiContent(markdown, markdownParser));
         return page;
     }
 
     public async Task<string> Save(PageWriteModel model)
     {
-        var permanentId = idService.Generate(DateTime.UtcNow.Ticks);
+        var permanentId = Guid.NewGuid().ToString();
         var wikiContent = new WikiContent(model.Markdown, markdownParser);
         var frontMatter = new ContentFrontMatter
         {
@@ -48,7 +44,9 @@ public class PageService(
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
         };
-        
+
+        // todo handle if page name already exists
+
         var pageGrain = grainFactory.GetGrain<IPageGrain>(permanentId);
         await pageGrain.CreatePage(frontMatter, wikiContent.MarkdownBody);
         return permanentId;
@@ -59,7 +57,7 @@ public class PageService(
         var wikiContent = new WikiContent(model.Markdown, markdownParser);
         var frontMatter = new ContentFrontMatter
         {
-            PermanentId = model.Slug.PermanentId,
+            PermanentId = model.Id,
             Title = wikiContent.GetTitle(),
             Type = model.Type.ToLower(),
             Category = model.Category,
@@ -68,9 +66,9 @@ public class PageService(
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
         };
-        
-        var pageGrain = grainFactory.GetGrain<IPageGrain>(model.Slug.PermanentId);
+
+        var pageGrain = grainFactory.GetGrain<IPageGrain>(model.Id);
         await pageGrain.UpdatePage(frontMatter, wikiContent.MarkdownBody);
-        return model.Slug.PermanentId;
+        return model.Id;
     }
 }

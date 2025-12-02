@@ -6,17 +6,14 @@ namespace Infrastructure.Repositories;
 
 public class PageRepository(IConfigurationService configurationService) : IPageRepository
 {
-    public async Task<string> Get(string id)
+    public async Task<string> Get(string fileName)
     {
         var outputDirectory = CreateOutputDirectoryIfNotExists();
-        
-        foreach (var file in Directory.GetFiles(outputDirectory, "*.md", SearchOption.TopDirectoryOnly))
+
+        var filePath = Path.Combine(outputDirectory, fileName);
+        if (File.Exists(filePath))
         {
-            if (file.EndsWith(id + ".md"))
-            {
-                var filePath = Path.Combine(outputDirectory, file);
-                return await File.ReadAllTextAsync(filePath, Encoding.UTF8); 
-            }
+            return await File.ReadAllTextAsync(filePath, Encoding.UTF8);
         }
 
         return string.Empty;
@@ -26,7 +23,7 @@ public class PageRepository(IConfigurationService configurationService) : IPageR
     {
         var contentList = new List<string>();
         var outputDirectory = CreateOutputDirectoryIfNotExists();
-        
+
         foreach (var file in Directory.GetFiles(outputDirectory, "*.md", SearchOption.TopDirectoryOnly))
         {
             var content = await File.ReadAllTextAsync(file, Encoding.UTF8);
