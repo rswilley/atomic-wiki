@@ -17,5 +17,5 @@ public class PageWriteModel : PageModelBase;
 
 public class PageUpdateModel : PageModelBase
 {
-    public required Slug Slug { get; init; }
+    public required string Id { get; init; }
 }

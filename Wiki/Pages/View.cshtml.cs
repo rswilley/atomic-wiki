@@ -9,6 +9,9 @@ public class PageViewModel(
     IPageService pageService) : PageModel
 {
     [FromRoute]
+    public string? PermanentId { get; set; } = "";
+
+    [FromRoute]
     public string Slug { get; set; } = "";
 
     // Core fields
@@ -32,8 +35,13 @@ public class PageViewModel(
 
     public async Task OnGetAsync()
     {
-        var page = await pageService.GetPage(Slug);
-        
+        if (string.IsNullOrWhiteSpace(PermanentId))
+        {
+            NotFound = true;
+            return;
+        }
+
+        var page = await pageService.GetPage(PermanentId);
         if (page == null)
         {
             NotFound = true;
@@ -56,67 +64,8 @@ public class PageViewModel(
 
         CreatedAt = page.Content.FrontMatter.CreatedAt;
         UpdatedAt = page.Content.FrontMatter.UpdatedAt;
-        
+
         RenderedContent = page.Content.RemoveTitleFromHtml();
-    }
-
-    // Stub: sample data
-    private IEnumerable<PageViewData> GetSamplePages() =>
-        new[]
-        {
-            new PageViewData
-            {
-                Title = "Orleans concurrency patterns",
-                Slug = "orleans-concurrency-patterns",
-                Type = "note",
-                IsPinned = true,
-                Summary = "Notes on grains, reentrancy, bulkhead pattern and message ordering.",
-                Content = "# Orleans concurrency patterns\n\nSome markdown content here.",
-                Category = "Development",
-                CategorySlug = "dev",
-                Tags = new List<PageTag>
-                {
-                    new PageTag { Name = "orleans", Slug = "orleans" },
-                    new PageTag { Name = "telemetry", Slug = "telemetry" }
-                },
-                CreatedAt = DateTime.UtcNow.AddDays(-7),
-                UpdatedAt = DateTime.UtcNow.AddDays(-1)
-            },
-            new PageViewData
-            {
-                Title = "2025-03-01 – Late night mix session",
-                Slug = "2025-03-01-late-night-mix-session",
-                Type = "journal",
-                Summary = "Quick log of track combos and transitions that worked well.",
-                Content = "## Tracks\n\n- Track A → Track B\n- Track C → Track D",
-                JournalDate = DateTime.Today,
-                JournalTime = new TimeSpan(22, 15, 0),
-                Category = "Music",
-                CategorySlug = "music",
-                Tags = new List<PageTag>
-                {
-                    new PageTag { Name = "music", Slug = "music" },
-                    new PageTag { Name = "dj", Slug = "dj" }
-                },
-                CreatedAt = DateTime.UtcNow.AddHours(-10),
-                UpdatedAt = DateTime.UtcNow.AddHours(-9)
-            }
-        };
-
-    // Stub markdown renderer – replace with a real one
-    private string RenderMarkdown(string markdown)
-    {
-        if (string.IsNullOrWhiteSpace(markdown))
-            return "";
-
-        // You’ll likely call into Markdig here, e.g.:
-        // var pipeline = new MarkdownPipelineBuilder().UseAdvancedExtensions().Build();
-        // return Markdown.ToHtml(markdown, pipeline);
-
-        // For now, super naive placeholder:
-        return markdown
-            .Replace("\r\n", "\n")
-            .Replace("\n\n", "<br/><br/>");
     }
 }
 

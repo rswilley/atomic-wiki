@@ -49,8 +49,9 @@ public class NotesModel(IGrainFactory grainFactory) : PageModel
         var pageIndexGrain = grainFactory.GetGrain<IPageIndexGrain>("index");
         Notes = (await pageIndexGrain.GetByType(nameof(PageType.Note).ToLower())).Select(p => new NoteListItem
         {
+            Id = p.Id,
             Title = p.Title,
-            Slug = $"{p.Title.ToSlug()}-{p.Id}",
+            Slug = p.Title.ToSlug(),
             UpdatedAt = p.UpdatedAt,
             Category = p.Category,
             Excerpt = p.Excerpt,
@@ -62,6 +63,7 @@ public class NotesModel(IGrainFactory grainFactory) : PageModel
 
 public class NoteListItem
 {
+    public string Id { get; set; } = "";
     public string Title { get; set; } = "";
     public string Slug { get; set; } = "";
     public DateTime UpdatedAt { get; set; }

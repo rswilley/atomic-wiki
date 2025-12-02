@@ -17,7 +17,7 @@
       "applicationUrl": "https://localhost:7086;http://localhost:5158",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
-        "DATA_DIRECTORY": "C:\\Users\\rober\\OneDrive\\AtomicWiki"
+        "DATA_DIRECTORY": "C:\\Users\\rs27726.VERMEERMFG\\OneDrive - Vermeer Corporation\\Documents\\AtomicWiki"
       }
     }
   }

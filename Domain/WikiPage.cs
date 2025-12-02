@@ -4,11 +4,11 @@ using Domain.Extensions;
 
 namespace Domain;
 
-public class WikiPage(WikiContent content, IIdService idService)
+public class WikiPage(WikiContent content)
 {
-    public string Id { get; } = content.FrontMatter.PermanentId ?? idService.Generate(DateTime.UtcNow.Ticks);
-    public string Slug { get; } = content.FrontMatter.Title?.ToSlug() ?? string.Empty;
-    public string FileName => $"{content.FrontMatter.Title?.ToSlug() ?? "Untitled"}-{Id}.md";
+    public string Id { get; } = content.FrontMatter.PermanentId;
+    public string Slug { get; } = content.FrontMatter.Title.ToSlug();
+    public string FileName => $"{string.Join(" ", content.FrontMatter.Title.Split(Path.GetInvalidFileNameChars(), StringSplitOptions.RemoveEmptyEntries))}.md";
     public WikiContent Content => content;
 }
 
@@ -36,7 +36,7 @@ public record WikiContent
             MarkdownBody = parsed.markdownBody;
         }
     }
-    
+
     public string GetTitle()
     {
         string pattern = @"<h1\b[^>]*>(.*?)<\/h1>";
@@ -58,7 +58,7 @@ public record WikiContent
 
         // Your regex logic lives here now
         var regex = new Regex(@"\[\[([^|\]]+)(?:\|.*?)?\]\]");
-        
+
         return regex.Matches(Value)
             .Select(m => m.Groups[1].Value.Trim())
             .Where(s => !string.IsNullOrEmpty(s))
@@ -69,17 +69,17 @@ public record WikiContent
     public string ToPlainText()
     {
         if (string.IsNullOrWhiteSpace(Value)) return string.Empty;
-        
+
         // Your cleaning logic lives here
-        var text = Regex.Replace(Value, @"#{1,6}\s", ""); 
+        var text = Regex.Replace(Value, @"#{1,6}\s", "");
         // ... rest of regex cleaning ...
         return text.Trim();
     }
-    
+
     public List<string> GetTags(string? tags)
     {
-        return string.IsNullOrEmpty(tags) 
-            ? [] 
+        return string.IsNullOrEmpty(tags)
+            ? []
             : tags.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries).ToList();
     }
 
@@ -87,7 +87,7 @@ public record WikiContent
     {
         var html = RemoveTitleFromHtml();
         var htmlStripped = Regex.Replace(html, "<.*?>", string.Empty);
-        
+
         if (htmlStripped.Length >= 45)
         {
             return string.Concat(htmlStripped.AsSpan(0, 45), "...");
@@ -95,7 +95,7 @@ public record WikiContent
 
         return htmlStripped;
     }
-    
+
     public string RemoveTitleFromHtml()
     {
         string pattern = @"<h1\b[^>]*>(.*?)<\/h1>";
@@ -116,7 +116,7 @@ public record WikiContent
 
 public class ContentFrontMatter
 {
-    public string? PermanentId { get; set; }
+    public string PermanentId { get; set; } = Guid.NewGuid().ToString();
     public string Title { get; set; } = "Untitled";
     public string Type { get; set; } = nameof(PageType.Note).ToLower();
 
@@ -127,6 +127,6 @@ public class ContentFrontMatter
 
     public DateTime? CreatedAt { get; set; }
     public DateTime? UpdatedAt { get; set; }
-    
+
     public Dictionary<string, object>? Extra { get; set; }
 }

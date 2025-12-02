@@ -13,10 +13,10 @@ public interface IPageGrain : IGrainWithStringKey
 {
     [Alias("CreatePage")]
     Task CreatePage(ContentFrontMatter frontMatter, string markdownBody);
-    
+
     [Alias("UpdatePage")]
     Task UpdatePage(ContentFrontMatter frontMatter, string markdownBody);
-    
+
     [Alias("GetOutgoingLinks")]
     Task<IReadOnlyList<string>> GetOutgoingLinks();
 
@@ -25,6 +25,10 @@ public interface IPageGrain : IGrainWithStringKey
 }
 
 public class PageGrain(
+    [PersistentState(
+        stateName: "pages",
+        storageName: "local")]
+    IPersistentState<PageGrainState> profile,
     IGrainContext grainContext,
     IGrainFactory grainFactory,
     IPageRepository pageRepository,
@@ -36,26 +40,30 @@ public class PageGrain(
 
     public async Task OnActivateAsync(CancellationToken cancellationToke)
     {
-        var id = this.GetPrimaryKeyString();
-        var pageMarkdown = await pageRepository.Get(id);
-        
+        if (string.IsNullOrEmpty(profile.State.FileName))
+        {
+            return;
+        }
+
+        var pageMarkdown = await pageRepository.Get(profile.State.FileName);
+
         if (!string.IsNullOrEmpty(pageMarkdown))
         {
-            _page = new WikiPage(new WikiContent(pageMarkdown, markdownParser), null!);
+            _page = new WikiPage(new WikiContent(pageMarkdown, markdownParser));
         }
     }
 
     public async Task CreatePage(ContentFrontMatter frontMatter, string markdownBody)
     {
         var fullMarkdown = markdownParser.Serialize(frontMatter, markdownBody);
-        _page = new WikiPage(new WikiContent(fullMarkdown, markdownParser), null!);
-        
+        _page = new WikiPage(new WikiContent(fullMarkdown, markdownParser));
+
         await SavePageDocument();
         SaveSearchIndex();
-        
+
         await HandleSetTags([], _page.Content.FrontMatter.Tags ?? []);
         await HandleUpdatedOutgoingLinks([], _page.Content.GetOutgoingLinks());
-        
+
         var pageIndexGrain = grainFactory.GetGrain<IPageIndexGrain>("index");
         await pageIndexGrain.AddToIndex(new PageIndexEntry
         {
@@ -68,20 +76,29 @@ public class PageGrain(
             IsPinned = _page.Content.FrontMatter.Pinned ?? false,
             Excerpt = _page.Content.GetExcerpt()
         });
+
+        profile.State.Id = _page.Id;
+        profile.State.FileName = _page.FileName;
+        await profile.WriteStateAsync();
     }
 
     public async Task UpdatePage(ContentFrontMatter frontMatter, string markdownBody)
     {
         var fullMarkdown = markdownParser.Serialize(frontMatter, markdownBody);
         var previousPage = _page;
-        _page = new WikiPage(new WikiContent(fullMarkdown, markdownParser), null!);
-        
+        _page = new WikiPage(new WikiContent(fullMarkdown, markdownParser));
+
         await SavePageDocument();
+        if (previousPage != null && previousPage.FileName != _page.FileName)
+        {
+            await DeletePreviousPageFile(previousPage.FileName);
+        }
         UpdateSearchIndex();
-        
-        await HandleSetTags(previousPage?.Content.FrontMatter.Tags ?? [], _page.Content.FrontMatter.Tags ?? []);
+
+        // Note: Tag updates are currently disabled
+        //await HandleSetTags(previousPage?.Content.FrontMatter.Tags ?? [], _page.Content.FrontMatter.Tags ?? []);
         await HandleUpdatedOutgoingLinks(previousPage?.Content.GetOutgoingLinks() ?? [], _page.Content.GetOutgoingLinks());
-        
+
         var pageIndexGrain = grainFactory.GetGrain<IPageIndexGrain>("index");
         await pageIndexGrain.UpdateIndex(new PageIndexEntry
         {
@@ -94,6 +111,10 @@ public class PageGrain(
             IsPinned = _page.Content.FrontMatter.Pinned ?? false,
             Excerpt = _page.Content.GetExcerpt()
         });
+
+        profile.State.Id = _page.Id;
+        profile.State.FileName = _page.FileName;
+        await profile.WriteStateAsync();
     }
 
     public Task<IReadOnlyList<string>> GetOutgoingLinks()
@@ -106,9 +127,9 @@ public class PageGrain(
     {
         return Task.FromResult(_page?.Content.Value);
     }
-    
+
     private WikiPage? _page;
-    
+
     private async Task HandleUpdatedOutgoingLinks(IReadOnlyCollection<string> old, IReadOnlyCollection<string> @new)
     {
         var oldLinks = old.ToHashSet(StringComparer.OrdinalIgnoreCase);
@@ -122,7 +143,7 @@ public class PageGrain(
             await coordinator.ApplyDelta(delta);
         }
     }
-    
+
     private async Task HandleSetTags(List<string> old, List<string> @new)
     {
         var oldTags = old.ToHashSet(StringComparer.OrdinalIgnoreCase);
@@ -153,7 +174,7 @@ public class PageGrain(
             Tags = _page.Content.FrontMatter.Tags?.ToList() ?? []
         });
     }
-    
+
     private void UpdateSearchIndex()
     {
         searchRepository.Update(new PageSearchItem
@@ -169,4 +190,15 @@ public class PageGrain(
     {
         await pageRepository.Save(_page!.Content.Value, _page.FileName);
     }
+
+    private async Task DeletePreviousPageFile(string fileName)
+    {
+        await pageRepository.Delete(fileName);
+    }
+}
+
+public class PageGrainState
+{
+    public required string? Id { get; set; }
+    public required string? FileName { get; set; }
 }
