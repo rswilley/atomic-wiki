@@ -14,7 +14,7 @@ public class ComposeModel(IPageService pageService) : Microsoft.AspNetCore.Mvc.R
         nameof(PageType.Journal).ToLower()
     ];
 
-    [BindProperty(SupportsGet = true)]
+    [BindProperty]
     public string? PermanentId { get; set; } = "";
 
     [BindProperty]
@@ -92,9 +92,8 @@ public class ComposeModel(IPageService pageService) : Microsoft.AspNetCore.Mvc.R
         return RedirectToPage("View", new { slug });
     }
 
-    public async Task<IActionResult> OnPostAsync(string? permanentId)
+    public async Task<IActionResult> OnPostAsync()
     {
-        PermanentId = permanentId;
         // Normalize type
         if (!AllowedTypes.Contains(Type.ToLowerInvariant()))
         {
