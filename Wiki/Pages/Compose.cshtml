@@ -103,11 +103,11 @@
             <div class="d-grid gap-2">
                 @if (string.IsNullOrEmpty(Model.PermanentId))
                 {
-                    <button asp-route-slug="@Model.PermanentId" type="submit" class="btn btn-primary btn-sm">Save</button>
+                    <button type="submit" class="btn btn-primary btn-sm">Save</button>
                 }
                 else
                 {
-                    <button asp-route-slug="@Model.PermanentId" type="submit" class="btn btn-primary btn-sm">Update</button>
+                    <button type="submit" class="btn btn-primary btn-sm">Update</button>
                 }
                 <a asp-page="/Compose"
                    asp-route-type="@Model.Type"
