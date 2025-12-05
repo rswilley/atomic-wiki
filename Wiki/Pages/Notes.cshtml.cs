@@ -1,13 +1,10 @@
-﻿using Domain.Enums;
-using Domain.Extensions;
-using Infrastructure.Actors.PageIndex;
-using Wiki.Models;
+﻿using Wiki.Services;
 
 namespace Wiki.Pages;
 
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
-public class NotesModel(IGrainFactory grainFactory) : PageModel
+public class NotesModel(IPageService pageService) : PageModel
 {
     public string? Query { get; set; }
     public string? Category { get; set; }
@@ -21,43 +18,7 @@ public class NotesModel(IGrainFactory grainFactory) : PageModel
         Category = category;
         Tag = tag;
 
-        // var queryable = db.Pages
-        //     .AsNoTracking()
-        //     .Where(p => p.Type == PageType.Note);
-
-        // if (!string.IsNullOrWhiteSpace(Query))
-        // {
-        //     queryable = queryable.Where(n =>
-        //         n.Title.Contains(Query, StringComparison.OrdinalIgnoreCase) ||
-        //         (n.Summary?.Contains(Query, StringComparison.OrdinalIgnoreCase) ?? false));
-        // }
-        //
-        // if (!string.IsNullOrWhiteSpace(Category))
-        // {
-        //     queryable = queryable.Where(n =>
-        //         n.Category != null &&
-        //         n.Category.Contains(Category, StringComparison.OrdinalIgnoreCase));
-        // }
-        //
-        // if (!string.IsNullOrWhiteSpace(Tag))
-        // {
-        //     queryable = queryable.Where(n =>
-        //         n.Tags != null &&
-        //         n.Tags.Any(t => t.Equals(Tag, StringComparison.OrdinalIgnoreCase)));
-        // }
-
-        var pageIndexGrain = grainFactory.GetGrain<IPageIndexGrain>("index");
-        Notes = (await pageIndexGrain.GetByType(nameof(PageType.Note).ToLower())).Select(p => new NoteListItem
-        {
-            Id = p.Id,
-            Title = p.Title,
-            Slug = p.Title.ToSlug(),
-            UpdatedAt = p.UpdatedAt,
-            Category = p.Category,
-            Excerpt = p.Excerpt,
-            Tags = p.Tags,
-            IsPinned = p.IsPinned
-        }).ToList();
+        Notes = await pageService.GetNotes();
     }
 }
 

@@ -33,7 +33,8 @@ public class PageGrain(
     IGrainFactory grainFactory,
     IPageRepository pageRepository,
     ISearchRepository searchRepository,
-    IMarkdownParser markdownParser)
+    IMarkdownParser markdownParser,
+    IIdService idService)
     : IGrainBase, IPageGrain
 {
     public IGrainContext GrainContext { get; } = grainContext;
@@ -58,7 +59,14 @@ public class PageGrain(
         var fullMarkdown = markdownParser.Serialize(frontMatter, markdownBody);
         _page = new WikiPage(new WikiContent(fullMarkdown, markdownParser));
 
-        await SavePageDocument();
+        var fileName = GetSafeFileName(_page.Content.FrontMatter.Title, "md");
+        var existingPage = await pageRepository.Get(fileName);
+        if (!string.IsNullOrEmpty(existingPage))
+        {
+            fileName = DetermineFileNameOnConflict(_page.Content.FrontMatter.Title);
+        }
+
+        await SavePageDocument(fileName);
         SaveSearchIndex();
 
         await HandleSetTags([], _page.Content.FrontMatter.Tags ?? []);
@@ -78,7 +86,7 @@ public class PageGrain(
         });
 
         profile.State.Id = _page.Id;
-        profile.State.FileName = _page.FileName;
+        profile.State.FileName = fileName;
         await profile.WriteStateAsync();
     }
 
@@ -88,11 +96,23 @@ public class PageGrain(
         var previousPage = _page;
         _page = new WikiPage(new WikiContent(fullMarkdown, markdownParser));
 
-        await SavePageDocument();
-        if (previousPage != null && previousPage.FileName != _page.FileName)
+        if (previousPage != null && previousPage.Content.FrontMatter.Title != _page.Content.FrontMatter.Title)
         {
-            await DeletePreviousPageFile(previousPage.FileName);
+            var incomingFileName = GetSafeFileName(_page.Content.FrontMatter.Title, "md");
+            await DeletePageByFileName(profile.State.FileName);
+            var existingPage = await pageRepository.Get(incomingFileName);
+            if (!string.IsNullOrEmpty(existingPage))
+            {
+                incomingFileName = DetermineFileNameOnConflict(_page.Content.FrontMatter.Title);
+            }
+            await SavePageDocument(incomingFileName);
+            profile.State.FileName = incomingFileName;
         }
+        else
+        {
+            await SavePageDocument(profile.State.FileName!);
+        }
+
         UpdateSearchIndex();
 
         // Note: Tag updates are currently disabled
@@ -113,7 +133,6 @@ public class PageGrain(
         });
 
         profile.State.Id = _page.Id;
-        profile.State.FileName = _page.FileName;
         await profile.WriteStateAsync();
     }
 
@@ -186,13 +205,34 @@ public class PageGrain(
         });
     }
 
-    private async Task SavePageDocument()
+    private async Task SavePageDocument(string fileName)
     {
-        await pageRepository.Save(_page!.Content.Value, _page.FileName);
+        await pageRepository.Save(_page!.Content.Value, fileName);
     }
 
-    private async Task DeletePreviousPageFile(string fileName)
+    private string DetermineFileNameOnConflict(string title)
     {
+        var fileName = GetSafeFileName(title, "");
+        fileName = $"{fileName}-{idService.Generate(DateTime.UtcNow.Ticks)}.md";
+        return fileName;
+    }
+
+    private static string GetSafeFileName(string title, string extension)
+    {
+        var fileName = $"{string.Join(" ", title.Split(Path.GetInvalidFileNameChars(), StringSplitOptions.RemoveEmptyEntries))}";
+        if (!string.IsNullOrWhiteSpace(extension))
+        {
+            fileName = $"{fileName}.{extension}";
+        }
+
+        return fileName;
+    }
+
+    private async Task DeletePageByFileName(string? fileName)
+    {
+        if (string.IsNullOrEmpty(fileName))
+            return;
+
         await pageRepository.Delete(fileName);
     }
 }

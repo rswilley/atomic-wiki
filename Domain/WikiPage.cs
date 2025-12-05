@@ -8,7 +8,6 @@ public class WikiPage(WikiContent content)
 {
     public string Id { get; } = content.FrontMatter.PermanentId;
     public string Slug { get; } = content.FrontMatter.Title.ToSlug();
-    public string FileName => $"{string.Join(" ", content.FrontMatter.Title.Split(Path.GetInvalidFileNameChars(), StringSplitOptions.RemoveEmptyEntries))}.md";
     public WikiContent Content => content;
 }
 

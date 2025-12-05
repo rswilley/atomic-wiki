@@ -1,12 +1,18 @@
 ﻿using Domain;
+using Domain.Enums;
+using Domain.Extensions;
 using Infrastructure.Actors.Page;
+using Infrastructure.Actors.PageIndex;
 using Wiki.Models;
+using Wiki.Pages;
 
 namespace Wiki.Services;
 
 public interface IPageService
 {
     Task<WikiPage?> GetPage(string id);
+    Task<List<NoteListItem>> GetNotes();
+    Task<List<JournalEntryItem>> GetJournals();
     Task<string> Save(PageWriteModel model);
     Task<string> Update(PageUpdateModel model);
 }
@@ -27,6 +33,36 @@ public class PageService(
 
         var page = new WikiPage(new WikiContent(markdown, markdownParser));
         return page;
+    }
+
+    public async Task<List<NoteListItem>> GetNotes()
+    {
+        var pageIndexGrain = grainFactory.GetGrain<IPageIndexGrain>("index");
+        return (await pageIndexGrain.GetByType(nameof(PageType.Note).ToLower())).Select(p => new NoteListItem
+        {
+            Id = p.Id,
+            Title = p.Title,
+            Slug = p.Title.ToSlug(),
+            UpdatedAt = p.UpdatedAt,
+            Category = p.Category,
+            Excerpt = p.Excerpt,
+            Tags = p.Tags,
+            IsPinned = p.IsPinned
+        }).ToList();
+    }
+
+    public async Task<List<JournalEntryItem>> GetJournals()
+    {
+        var pageIndexGrain = grainFactory.GetGrain<IPageIndexGrain>("index");
+        return (await pageIndexGrain.GetByType(nameof(PageType.Journal).ToLower())).Select(p => new JournalEntryItem
+        {
+            Id = p.Id,
+            Title = p.Title,
+            Slug = p.Title.ToSlug(),
+            Date = p.CreatedAt,
+            Excerpt = p.Excerpt,
+            Tags = p.Tags
+        }).ToList();
     }
 
     public async Task<string> Save(PageWriteModel model)
@@ -63,7 +99,7 @@ public class PageService(
             Category = model.Category,
             Tags = wikiContent.GetTags(model.Tags),
             Pinned = model.IsPinned,
-            CreatedAt = DateTime.UtcNow,
+            CreatedAt = DateTime.UtcNow,//todo fix this bug
             UpdatedAt = DateTime.UtcNow
         };
 
