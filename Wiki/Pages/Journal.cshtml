@@ -88,10 +88,6 @@
                             <article class="card journal-entry h-100">
                                 <div class="card-body py-2 px-3 d-flex flex-column">
                                     <div class="d-flex justify-content-between align-items-start mb-1">
-                                        <div class="small text-muted">
-                                            @entry.Time?.ToString(@"hh\:mm") ?? "--:--"
-                                        </div>
-
                                         @if (entry.Tags?.Any() == true)
                                         {
                                             <div class="d-none d-sm-flex flex-wrap gap-1 small ms-2">
@@ -106,18 +102,19 @@
                                     @if (!string.IsNullOrWhiteSpace(entry.Title))
                                     {
                                         <h2 class="h6 mb-1">
-                                            <a asp-page="/JournalEntry"
-                                               asp-route-id="@entry.Id"
+                                            <a asp-page="/View"
+                                               asp-route-permanentId="@entry.Id"
+                                               asp-route-slug="@entry.Slug"
                                                class="text-decoration-none">
                                                 @entry.Title
                                             </a>
                                         </h2>
                                     }
 
-                                    @if (!string.IsNullOrWhiteSpace(entry.Snippet))
+                                    @if (!string.IsNullOrWhiteSpace(entry.Excerpt))
                                     {
                                         <p class="small text-muted mb-0">
-                                            @entry.Snippet
+                                            @entry.Excerpt
                                         </p>
                                     }
                                 </div>
