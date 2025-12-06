@@ -1,12 +1,13 @@
-﻿using Domain;
-using Domain.Enums;
-using Domain.Repositories;
+﻿using Domain.Enums;
 
 namespace Infrastructure.Actors.PageIndex;
 
 [Alias("Actors.PageIndex")]
 public interface IPageIndexGrain : IGrainWithStringKey
 {
+    [Alias("GetById")]
+    Task<PageIndexEntry?> GetById(string id);
+    
     [Alias("GetByType")]
     Task<List<PageIndexEntry>> GetByType(string type);
 
@@ -15,45 +16,23 @@ public interface IPageIndexGrain : IGrainWithStringKey
 
     [Alias("UpdateIndex")]
     Task UpdateIndex(PageIndexEntry entry);
+
+    [Alias("GetState")]
+    Task<PageIndexState> GetState();
 }
 
 public class PageIndexGrain(
     [PersistentState(
         stateName: "page_index",
         storageName: "local")]
-    IPersistentState<NoteIndexState> profile,
-    IGrainContext grainContext,
-    IPageRepository pageRepository,
-    IMarkdownParser markdownParser) : IGrainBase, IPageIndexGrain
+    IPersistentState<PageIndexState> profile,
+    IGrainContext grainContext) : IGrainBase, IPageIndexGrain
 {
     public IGrainContext GrainContext { get; } = grainContext;
 
-    public async Task OnActivateAsync(CancellationToken cancellationToke)
+    public Task<PageIndexEntry?> GetById(string id)
     {
-        var firstBoot = profile.State.LastIndexDate == null;
-        if (firstBoot)
-        {
-            var allContent = await pageRepository.GetAll();
-            foreach (var content in allContent)
-            {
-                var page = new WikiPage(new WikiContent(content, markdownParser));
-                profile.State.Pages.Add(page.Id, new PageIndexEntry
-                {
-                    Id = page.Id,
-                    Title = page.Content.FrontMatter.Title,
-                    Type = page.Content.FrontMatter.Type.ToLower(),
-                    CreatedAt = page.Content.FrontMatter.CreatedAt ?? DateTime.UtcNow,
-                    UpdatedAt = page.Content.FrontMatter.UpdatedAt ?? DateTime.UtcNow,
-                    Category = page.Content.FrontMatter.Category,
-                    Tags = page.Content.FrontMatter.Tags ?? [],
-                    IsPinned = page.Content.FrontMatter.Pinned ?? false,
-                    Excerpt = page.Content.GetExcerpt()
-                });
-            }
-
-            profile.State.LastIndexDate = DateTime.UtcNow;
-            await profile.WriteStateAsync(cancellationToke);
-        }
+        return Task.FromResult(profile.State.Pages.TryGetValue(id, out var entry) ? entry : null);
     }
 
     public Task<List<PageIndexEntry>> GetByType(string type)
@@ -75,6 +54,11 @@ public class PageIndexGrain(
     {
         profile.State.Pages[entry.Id] = entry;
         await profile.WriteStateAsync();
+    }
+
+    public Task<PageIndexState> GetState()
+    {
+        return Task.FromResult(profile.State);
     }
 }
 
@@ -102,9 +86,11 @@ public class PageIndexEntry
     public required string Excerpt { get; set; } = "";
 }
 
-public class NoteIndexState
+[GenerateSerializer]
+[Alias("Actors.PageIndex.PageIndexState")]
+public class PageIndexState
 {
     // permanentId -> page
-    public Dictionary<string, PageIndexEntry> Pages { get; set; } = [];
-    public DateTime? LastIndexDate { get; set; }
+    [Id(0)]
+    public Dictionary<string, PageIndexEntry> Pages { get; } = [];
 }

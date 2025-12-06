@@ -48,14 +48,12 @@ public record WikiContent
 
         return "Untitled";
     }
-
-    // Logic moves here. The data 'owns' the behavior.
+    
     public IReadOnlyCollection<string> GetOutgoingLinks()
     {
         if (string.IsNullOrWhiteSpace(Value))
             return Array.Empty<string>();
-
-        // Your regex logic lives here now
+        
         var regex = new Regex(@"\[\[([^|\]]+)(?:\|.*?)?\]\]");
 
         return regex.Matches(Value)
@@ -67,11 +65,10 @@ public record WikiContent
 
     public string ToPlainText()
     {
-        if (string.IsNullOrWhiteSpace(Value)) return string.Empty;
-
-        // Your cleaning logic lives here
+        if (string.IsNullOrWhiteSpace(Value)) 
+            return string.Empty;
+        
         var text = Regex.Replace(Value, @"#{1,6}\s", "");
-        // ... rest of regex cleaning ...
         return text.Trim();
     }
 
