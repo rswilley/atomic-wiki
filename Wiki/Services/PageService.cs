@@ -81,8 +81,6 @@ public class PageService(
             UpdatedAt = DateTime.UtcNow
         };
 
-        // todo handle if page name already exists
-
         var pageGrain = grainFactory.GetGrain<IPageGrain>(permanentId);
         await pageGrain.CreatePage(frontMatter, wikiContent.MarkdownBody);
         return permanentId;
@@ -90,6 +88,9 @@ public class PageService(
 
     public async Task<string> Update(PageUpdateModel model)
     {
+        var pageIndexGrain = grainFactory.GetGrain<IPageIndexGrain>("index");
+        var existingPageIndex = await pageIndexGrain.GetById(model.Id);
+        
         var wikiContent = new WikiContent(model.Markdown, markdownParser);
         var frontMatter = new ContentFrontMatter
         {
@@ -99,7 +100,7 @@ public class PageService(
             Category = model.Category,
             Tags = wikiContent.GetTags(model.Tags),
             Pinned = model.IsPinned,
-            CreatedAt = DateTime.UtcNow,//todo fix this bug
+            CreatedAt = existingPageIndex?.CreatedAt,
             UpdatedAt = DateTime.UtcNow
         };
 

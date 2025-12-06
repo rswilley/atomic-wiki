@@ -4,6 +4,7 @@ using Infrastructure;
 using Infrastructure.Extensions;
 using Infrastructure.Repositories;
 using Infrastructure.Services;
+using Infrastructure.StartupTasks;
 using Wiki.Services;
 using ISearchRepository = Infrastructure.Repositories.ISearchRepository;
 using MarkdownParser = Infrastructure.MarkdownParser;
@@ -15,11 +16,13 @@ ArgumentException.ThrowIfNullOrEmpty(dataDirectory);
 
 builder.Host.UseOrleans(siloBuilder =>
 {
-    siloBuilder.UseLocalhostClustering();
-    siloBuilder.AddLocalFileGrainStorage("local", options =>
-    {
-        options.RootDirectory = Path.Combine(dataDirectory, "db");
-    });
+    siloBuilder
+        .UseLocalhostClustering()
+        .AddLocalFileGrainStorage("local", options =>
+        {
+            options.RootDirectory = Path.Combine(dataDirectory, "db");
+        })
+        .AddStartupTask<SeedInitialPageIndexTask>();
 });
 
 // Add services to the container.
