@@ -33,6 +33,24 @@ public class PageRepository(IConfigurationService configurationService) : IPageR
         return contentList;
     }
 
+    public async Task<List<string>> Import()
+    {
+        var importDirectory = Path.Combine(configurationService.GetDataDirectory(), "import");
+        if (!Directory.Exists(importDirectory))
+        {
+            return [];
+        }
+        
+        var contentList = new List<string>();
+        foreach (var file in Directory.GetFiles(importDirectory, "*.md", SearchOption.TopDirectoryOnly))
+        {
+            var content = await File.ReadAllTextAsync(file, Encoding.UTF8);
+            contentList.Add(content);
+        }
+
+        return contentList;
+    }
+
     private string CreateOutputDirectoryIfNotExists()
     {
         var directory = Path.Combine(configurationService.GetDataDirectory(), "output");

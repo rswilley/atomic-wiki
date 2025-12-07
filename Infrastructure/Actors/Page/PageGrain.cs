@@ -59,11 +59,11 @@ public class PageGrain(
         var fullMarkdown = markdownParser.Serialize(frontMatter, markdownBody);
         _page = new WikiPage(new WikiContent(fullMarkdown, markdownParser));
 
-        var fileName = GetSafeFileName(_page.Content.FrontMatter.Title, "md");
+        var fileName = GetSafeFileName(_page.Title, "md");
         var existingPage = await pageRepository.Get(fileName);
         if (!string.IsNullOrEmpty(existingPage))
         {
-            fileName = DetermineFileNameOnConflict(_page.Content.FrontMatter.Title);
+            fileName = DetermineFileNameOnConflict(_page.Title);
         }
 
         await SavePageDocument(fileName);
@@ -76,7 +76,7 @@ public class PageGrain(
         await pageIndexGrain.AddToIndex(new PageIndexEntry
         {
             Id = _page.Id,
-            Title = _page.Content.FrontMatter.Title,
+            Title = _page.Title,
             Type = _page.Content.FrontMatter.Type,
             CreatedAt = _page.Content.FrontMatter.CreatedAt ?? DateTime.UtcNow,
             UpdatedAt = _page.Content.FrontMatter.UpdatedAt ?? DateTime.UtcNow,
@@ -96,14 +96,14 @@ public class PageGrain(
         var previousPage = _page;
         _page = new WikiPage(new WikiContent(fullMarkdown, markdownParser));
 
-        if (previousPage != null && previousPage.Content.FrontMatter.Title != _page.Content.FrontMatter.Title)
+        if (previousPage != null && previousPage.Title != _page.Title)
         {
-            var incomingFileName = GetSafeFileName(_page.Content.FrontMatter.Title, "md");
+            var incomingFileName = GetSafeFileName(_page.Title, "md");
             await DeletePageByFileName(profile.State.FileName);
             var existingPage = await pageRepository.Get(incomingFileName);
             if (!string.IsNullOrEmpty(existingPage))
             {
-                incomingFileName = DetermineFileNameOnConflict(_page.Content.FrontMatter.Title);
+                incomingFileName = DetermineFileNameOnConflict(_page.Title);
             }
             await SavePageDocument(incomingFileName);
             profile.State.FileName = incomingFileName;
@@ -123,7 +123,7 @@ public class PageGrain(
         await pageIndexGrain.UpdateIndex(new PageIndexEntry
         {
             Id = _page.Id,
-            Title = _page.Content.FrontMatter.Title,
+            Title = _page.Title,
             Type = _page.Content.FrontMatter.Type,
             CreatedAt = _page.Content.FrontMatter.CreatedAt ?? DateTime.UtcNow,
             UpdatedAt = _page.Content.FrontMatter.UpdatedAt ?? DateTime.UtcNow,
@@ -188,7 +188,7 @@ public class PageGrain(
         searchRepository.Create(new PageSearchItem
         {
             PermanentId = _page!.Id,
-            Title = _page.Content.FrontMatter.Title,
+            Title = _page.Title,
             Body = _page.Content.Value,
             Tags = _page.Content.FrontMatter.Tags?.ToList() ?? []
         });
@@ -199,7 +199,7 @@ public class PageGrain(
         searchRepository.Update(new PageSearchItem
         {
             PermanentId = _page!.Id,
-            Title = _page.Content.FrontMatter.Title,
+            Title = _page.Title,
             Body = _page.Content.Value,
             Tags = _page.Content.FrontMatter.Tags?.ToList() ?? []
         });

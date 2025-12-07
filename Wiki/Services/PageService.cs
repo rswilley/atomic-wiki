@@ -1,6 +1,6 @@
 ﻿using Domain;
 using Domain.Enums;
-using Domain.Extensions;
+using Domain.ValueObject;
 using Infrastructure.Actors.Page;
 using Infrastructure.Actors.PageIndex;
 using Wiki.Models;
@@ -42,7 +42,7 @@ public class PageService(
         {
             Id = p.Id,
             Title = p.Title,
-            Slug = p.Title.ToSlug(),
+            Slug = new Slug(p.Title).SlugValue,
             UpdatedAt = p.UpdatedAt,
             Category = p.Category,
             Excerpt = p.Excerpt,
@@ -58,7 +58,7 @@ public class PageService(
         {
             Id = p.Id,
             Title = p.Title,
-            Slug = p.Title.ToSlug(),
+            Slug = new Slug(p.Title).SlugValue,
             Date = p.CreatedAt,
             Excerpt = p.Excerpt,
             Tags = p.Tags
@@ -72,7 +72,6 @@ public class PageService(
         var frontMatter = new ContentFrontMatter
         {
             PermanentId = permanentId,
-            Title = wikiContent.GetTitle(),
             Type = model.Type.ToLower(),
             Category = model.Category,
             Tags = wikiContent.GetTags(model.Tags),
@@ -95,7 +94,6 @@ public class PageService(
         var frontMatter = new ContentFrontMatter
         {
             PermanentId = model.Id,
-            Title = wikiContent.GetTitle(),
             Type = model.Type.ToLower(),
             Category = model.Category,
             Tags = wikiContent.GetTags(model.Tags),

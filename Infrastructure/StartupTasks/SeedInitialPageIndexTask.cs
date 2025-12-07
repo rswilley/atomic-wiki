@@ -21,8 +21,8 @@ public sealed class SeedInitialPageIndexTask(
         var pageRepository = scope.ServiceProvider.GetRequiredService<IPageRepository>();
         var markdownParser = scope.ServiceProvider.GetRequiredService<IMarkdownParser>();
         
-        var allContent = await pageRepository.GetAll();
-        foreach (var content in allContent)
+        var allContentToImport = await pageRepository.Import();
+        foreach (var content in allContentToImport)
         {
             var page = new WikiPage(new WikiContent(content, markdownParser));
             var pageGrain = grainFactory.GetGrain<IPageGrain>(page.Id);
