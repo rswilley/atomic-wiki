@@ -12,10 +12,10 @@ namespace Infrastructure.Actors.Page;
 public interface IPageGrain : IGrainWithStringKey
 {
     [Alias("CreatePage")]
-    Task CreatePage(ContentFrontMatter frontMatter, string markdownBody);
+    Task CreatePage(PageMeta frontMatter, string markdownBody);
 
     [Alias("UpdatePage")]
-    Task UpdatePage(ContentFrontMatter frontMatter, string markdownBody);
+    Task UpdatePage(PageMeta frontMatter, string markdownBody);
 
     [Alias("GetOutgoingLinks")]
     Task<IReadOnlyList<string>> GetOutgoingLinks();
@@ -54,7 +54,7 @@ public class PageGrain(
         }
     }
 
-    public async Task CreatePage(ContentFrontMatter frontMatter, string markdownBody)
+    public async Task CreatePage(PageMeta frontMatter, string markdownBody)
     {
         var fullMarkdown = markdownParser.Serialize(frontMatter, markdownBody);
         _page = new WikiPage(new WikiContent(fullMarkdown, markdownParser));
@@ -90,7 +90,7 @@ public class PageGrain(
         await profile.WriteStateAsync();
     }
 
-    public async Task UpdatePage(ContentFrontMatter frontMatter, string markdownBody)
+    public async Task UpdatePage(PageMeta frontMatter, string markdownBody)
     {
         var fullMarkdown = markdownParser.Serialize(frontMatter, markdownBody);
         var previousPage = _page;

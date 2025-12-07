@@ -19,10 +19,10 @@ public struct ContentFrontMatterSurrogate
 
 [RegisterConverter]
 public sealed class ContentFrontMatterSurrogateConverter :
-    IConverter<ContentFrontMatter, ContentFrontMatterSurrogate>,
-    IPopulator<ContentFrontMatter, ContentFrontMatterSurrogate>
+    IConverter<PageMeta, ContentFrontMatterSurrogate>,
+    IPopulator<PageMeta, ContentFrontMatterSurrogate>
 {
-    public ContentFrontMatter ConvertFromSurrogate(
+    public PageMeta ConvertFromSurrogate(
         in ContentFrontMatterSurrogate surrogate) =>
         new()
         {
@@ -37,7 +37,7 @@ public sealed class ContentFrontMatterSurrogateConverter :
         };
 
     public ContentFrontMatterSurrogate ConvertToSurrogate(
-        in ContentFrontMatter value) =>
+        in PageMeta value) =>
         new()
         {
             PermanentId = value.PermanentId,
@@ -51,7 +51,7 @@ public sealed class ContentFrontMatterSurrogateConverter :
         };
 
     public void Populate(
-        in ContentFrontMatterSurrogate surrogate, ContentFrontMatter value)
+        in ContentFrontMatterSurrogate surrogate, PageMeta value)
     {
         value.PermanentId = surrogate.PermanentId;
         value.Type = surrogate.Type;

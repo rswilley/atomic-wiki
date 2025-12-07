@@ -92,5 +92,5 @@ public class PageIndexState
 {
     // permanentId -> page
     [Id(0)]
-    public Dictionary<string, PageIndexEntry> Pages { get; } = [];
+    public Dictionary<string, PageIndexEntry> Pages { get; set; } = [];
 }

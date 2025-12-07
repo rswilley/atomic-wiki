@@ -12,7 +12,7 @@ public class WikiPage(WikiContent content)
 
 public record WikiContent
 {
-    public ContentFrontMatter FrontMatter { get; }
+    public PageMeta FrontMatter { get; }
     public string Value { get; }
     public string Html { get; }
     public string MarkdownBody { get; }
@@ -22,13 +22,13 @@ public record WikiContent
         Value = markdown ?? string.Empty;
         if (string.IsNullOrWhiteSpace(Value))
         {
-            FrontMatter = new ContentFrontMatter();
+            FrontMatter = new PageMeta();
             Html = string.Empty;
             MarkdownBody = string.Empty;
         }
         else
         {
-            var parsed = markdownParser.Deserialize<ContentFrontMatter>(Value);
+            var parsed = markdownParser.Deserialize<PageMeta>(Value);
             FrontMatter = parsed.meta;
             Html = parsed.html;
             MarkdownBody = parsed.markdownBody;
@@ -109,7 +109,7 @@ public record WikiContent
     }
 }
 
-public class ContentFrontMatter
+public class PageMeta
 {
     public string PermanentId { get; set; } = Guid.NewGuid().ToString();
     public string Type { get; set; } = nameof(PageType.Note).ToLower();
