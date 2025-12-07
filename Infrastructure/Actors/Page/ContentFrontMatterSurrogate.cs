@@ -27,7 +27,6 @@ public sealed class ContentFrontMatterSurrogateConverter :
         new()
         {
             PermanentId = surrogate.PermanentId,
-            Title = surrogate.Title,
             Type = surrogate.Type, 
             Category = surrogate.Category, 
             Tags = surrogate.Tags, 
@@ -42,7 +41,6 @@ public sealed class ContentFrontMatterSurrogateConverter :
         new()
         {
             PermanentId = value.PermanentId,
-            Title = value.Title,
             Type = value.Type, 
             Category = value.Category, 
             Tags = value.Tags, 
@@ -56,7 +54,6 @@ public sealed class ContentFrontMatterSurrogateConverter :
         in ContentFrontMatterSurrogate surrogate, ContentFrontMatter value)
     {
         value.PermanentId = surrogate.PermanentId;
-        value.Title = surrogate.Title;
         value.Type = surrogate.Type;
         value.Category = surrogate.Category;
         value.Tags = surrogate.Tags;

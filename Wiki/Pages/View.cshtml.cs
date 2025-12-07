@@ -1,4 +1,4 @@
-﻿using Domain.Extensions;
+﻿using Domain.ValueObject;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Wiki.Services;
@@ -48,18 +48,18 @@ public class PageViewModel(
             return;
         }
 
-        Title = page.Content.FrontMatter.Title;
+        Title = page.Title;
         Type = page.Content.FrontMatter.Type;
         IsPinned = page.Content.FrontMatter.Pinned ?? false;
         Excerpt = page.Content.GetExcerpt();
         Content = page.Content.MarkdownBody;
 
         Category = page.Content.FrontMatter.Category;
-        CategorySlug = page.Content.FrontMatter.Category?.ToSlug();
+        CategorySlug = new Slug(page.Content.FrontMatter.Category).SlugValue;
         Tags = page.Content.FrontMatter.Tags?.Select(tag => new PageTag
         {
             Name = tag,
-            Slug = tag.ToSlug()
+            Slug = new Slug(tag).SlugValue
         }).ToList() ?? [];
 
         CreatedAt = page.Content.FrontMatter.CreatedAt;

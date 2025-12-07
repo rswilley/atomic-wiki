@@ -1,13 +1,12 @@
 ﻿using System.Text.RegularExpressions;
 using Domain.Enums;
-using Domain.Extensions;
 
 namespace Domain;
 
 public class WikiPage(WikiContent content)
 {
     public string Id { get; } = content.FrontMatter.PermanentId;
-    public string Slug { get; } = content.FrontMatter.Title.ToSlug();
+    public string Title { get; } = content.GetTitle();
     public WikiContent Content => content;
 }
 
@@ -113,7 +112,6 @@ public record WikiContent
 public class ContentFrontMatter
 {
     public string PermanentId { get; set; } = Guid.NewGuid().ToString();
-    public string Title { get; set; } = "Untitled";
     public string Type { get; set; } = nameof(PageType.Note).ToLower();
 
     public string? Category { get; set; }
