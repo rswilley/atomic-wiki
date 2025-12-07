@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Net.Mime;
+using System.Text;
 using Domain;
 using Domain.Repositories;
 
@@ -33,16 +34,12 @@ public class PageRepository(IConfigurationService configurationService) : IPageR
         return contentList;
     }
 
-    public async Task<List<string>> Import()
+    public async Task<List<string>> GetSeedData()
     {
-        var importDirectory = Path.Combine(configurationService.GetDataDirectory(), "import");
-        if (!Directory.Exists(importDirectory))
-        {
-            return [];
-        }
-        
         var contentList = new List<string>();
-        foreach (var file in Directory.GetFiles(importDirectory, "*.md", SearchOption.TopDirectoryOnly))
+        var seedDataDirectory = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "SeedData");
+
+        foreach (var file in Directory.GetFiles(seedDataDirectory, "*.md", SearchOption.TopDirectoryOnly))
         {
             var content = await File.ReadAllTextAsync(file, Encoding.UTF8);
             contentList.Add(content);

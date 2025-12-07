@@ -69,7 +69,7 @@ public class PageService(
     {
         var permanentId = Guid.NewGuid().ToString();
         var wikiContent = new WikiContent(model.Markdown, markdownParser);
-        var frontMatter = new ContentFrontMatter
+        var frontMatter = new PageMeta
         {
             PermanentId = permanentId,
             Type = model.Type.ToLower(),
@@ -91,7 +91,7 @@ public class PageService(
         var existingPageIndex = await pageIndexGrain.GetById(model.Id);
         
         var wikiContent = new WikiContent(model.Markdown, markdownParser);
-        var frontMatter = new ContentFrontMatter
+        var frontMatter = new PageMeta
         {
             PermanentId = model.Id,
             Type = model.Type.ToLower(),
