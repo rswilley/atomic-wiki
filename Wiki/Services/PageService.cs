@@ -87,9 +87,6 @@ public class PageService(
 
     public async Task<string> Update(PageUpdateModel model)
     {
-        var pageIndexGrain = grainFactory.GetGrain<IPageIndexGrain>("index");
-        var existingPageIndex = await pageIndexGrain.GetById(model.Id);
-        
         var wikiContent = new WikiContent(model.Markdown, markdownParser);
         var frontMatter = new PageMeta
         {
@@ -98,7 +95,7 @@ public class PageService(
             Category = model.Category,
             Tags = wikiContent.GetTags(model.Tags),
             Pinned = model.IsPinned,
-            CreatedAt = existingPageIndex?.CreatedAt,
+            CreatedAt = model.CreatedAt,
             UpdatedAt = DateTime.UtcNow
         };
 
