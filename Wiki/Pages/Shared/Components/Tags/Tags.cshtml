@@ -1,0 +1,9 @@
+@model List<TagsList.TagsModel>
+
+@foreach (var tag in Model)
+{
+    <li>
+        <a asp-page="/Tags/List" asp-route-slug="@tag.Slug" class="badge bg-light text-dark border">@tag.Name</a>
+    </li>
+}
+<a asp-page="/Tags/List" class="badge bg-light text-dark border">untagged</a>
