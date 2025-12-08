@@ -5,6 +5,12 @@ namespace Infrastructure.Actors.PageIndex;
 [Alias("Actors.PageIndex")]
 public interface IPageIndexGrain : IGrainWithStringKey
 {
+    [Alias("GetRecentPages")]
+    Task<List<PageIndexEntry>> GetRecentPages(bool isPinned);
+
+    [Alias("GetCount")]
+    Task<PageIndexCount> GetCount();
+    
     [Alias("GetById")]
     Task<PageIndexEntry?> GetById(string id);
     
@@ -29,6 +35,36 @@ public class PageIndexGrain(
     IGrainContext grainContext) : IGrainBase, IPageIndexGrain
 {
     public IGrainContext GrainContext { get; } = grainContext;
+
+    public Task<List<PageIndexEntry>> GetRecentPages(bool isPinned)
+    {
+        return Task.FromResult(
+            profile.State.Pages
+                .Where(e => e.Value.IsPinned == isPinned)
+                .OrderByDescending(e => e.Value.UpdatedAt)
+                .Select(e => e.Value)
+                .Take(5)
+                .ToList()
+        );
+    }
+
+    public Task<PageIndexCount> GetCount()
+    {
+        var noteCount = profile.State.Pages.Values.Count(e => e.Type.Equals(nameof(PageType.Note), StringComparison.CurrentCultureIgnoreCase));
+        var postCount = profile.State.Pages.Values.Count(e => e.Type.Equals(nameof(PageType.Post), StringComparison.CurrentCultureIgnoreCase));
+        var journalCount = profile.State.Pages.Values.Count(e => e.Type.Equals(nameof(PageType.Journal), StringComparison.CurrentCultureIgnoreCase));
+        var categoryCount = profile.State.Pages.Values.SelectMany(e => e.Category ?? "").Distinct().Count();
+        var tagCount = profile.State.Pages.Values.SelectMany(e => e.Tags).Distinct().Count();
+
+        return Task.FromResult(new PageIndexCount
+        {
+            NoteCount = noteCount,
+            PostCount = postCount,
+            JournalCount = journalCount,
+            CategoryCount = categoryCount,
+            TagCount = tagCount
+        });
+    }
 
     public Task<PageIndexEntry?> GetById(string id)
     {
@@ -84,6 +120,22 @@ public class PageIndexEntry
     public required bool IsPinned { get; set; }
     [Id(8)]
     public required string Excerpt { get; set; } = "";
+}
+
+[GenerateSerializer]
+[Alias("Actors.PageIndex.PageIndexCount")]
+public class PageIndexCount
+{
+    [Id(0)]
+    public int NoteCount { get; init; }
+    [Id(1)]
+    public int PostCount { get; init; }
+    [Id(2)]
+    public int JournalCount { get; init; }
+    [Id(3)]
+    public int CategoryCount { get; init; }
+    [Id(4)]
+    public int TagCount { get; init; }
 }
 
 [GenerateSerializer]

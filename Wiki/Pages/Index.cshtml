@@ -13,43 +13,51 @@
             <h2 class="h6 text-muted mb-2">Recent Notes</h2>
 
             <ul class="list-group list-group-flush">
-                @* Example static items; later bind from Model *@
-                <li class="list-group-item px-0">
-                    <a asp-page="/Page" asp-route-slug="telemetry-cluster-design"
-                       class="fw-semibold d-block">
-                        Telemetry cluster design notes
-                    </a>
-                    <small class="text-muted">
-                        Last updated 2025-11-25 • tags: telemetry, orleans
-                    </small>
-                </li>
-                <li class="list-group-item px-0">
-                    <a asp-page="/Page" asp-route-slug="ai-visual-workflow"
-                       class="fw-semibold d-block">
-                        AI visual workflow for techno mixes
-                    </a>
-                    <small class="text-muted">
-                        Last updated 2025-11-20 • tags: ai, visuals
-                    </small>
-                </li>
+                @foreach (var note in Model.HomeModel.Recent)
+                {
+                    <li class="list-group-item px-0">
+                        <a asp-page="/View" 
+                           asp-route-permanentId="@note.Id"
+                           asp-route-slug="@note.Slug"
+                           class="fw-semibold d-block">
+                            @note.Title
+                        </a>
+                        <small class="text-muted">
+                            Last updated @note.UpdatedAt?.ToString("yyyy-MM-dd")
+                            @if (!string.IsNullOrEmpty(note.Tags))
+                            {
+                                <text>• tags: @note.Tags</text>
+                            }
+                        </small>
+                    </li>   
+                }
             </ul>
         </section>
 
         <!-- Pinned -->
         <section>
             <h2 class="h6 text-muted mb-2">Pinned</h2>
+            
             <div class="row g-2">
-                <div class="col-md-6">
-                    <div class="card card-body py-2">
-                        <a asp-page="/Page" asp-route-slug="atomic-wiki-architecture"
-                           class="fw-semibold">
-                            Atomic Wiki architecture
-                        </a>
-                        <small class="text-muted d-block">
-                            Core decisions, schema, and patterns.
-                        </small>
+                @foreach (var note in Model.HomeModel.Pinned)
+                {
+                    <div class="col-md-6">
+                        <div class="card card-body py-2">
+                            <a asp-page="/View" 
+                               asp-route-permanentId="@note.Id"
+                               asp-route-slug="@note.Slug"
+                               class="fw-semibold">
+                                @note.Title
+                            </a>
+                            <small class="text-muted d-block">
+                                @if (!string.IsNullOrEmpty(note.Tags))
+                                {
+                                    <text>tags: @note.Tags</text>
+                                }
+                            </small>
+                        </div>
                     </div>
-                </div>
+                }
             </div>
         </section>
     </div>
@@ -65,13 +73,65 @@
             </div>
         </section>
 
-        <!-- Stats (placeholder) -->
+        <!-- Stats -->
         <section>
             <h2 class="h6 text-muted mb-2">Stats</h2>
             <ul class="list-unstyled small mb-0">
-                <li><strong>42</strong> notes</li>
-                <li><strong>13</strong> posts</li>
-                <li><strong>18</strong> tags</li>
+                <li>
+                    <strong>@Model.HomeModel.NoteCount</strong> 
+                    @if (Model.HomeModel.NoteCount == 1)
+                    {
+                        <text>note</text>
+                    }
+                    else
+                    {
+                        <text>notes</text>
+                    }
+                </li>
+                <li>
+                    <strong>@Model.HomeModel.PostCount</strong> 
+                    @if (Model.HomeModel.PostCount == 1)
+                    {
+                        <text>post</text>
+                    }
+                    else
+                    {
+                        <text>posts</text>
+                    }
+                </li>
+                <li>
+                    <strong>@Model.HomeModel.JournalCount</strong> 
+                    @if (Model.HomeModel.JournalCount == 1)
+                    {
+                        <text>journal entry</text>
+                    }
+                    else
+                    {
+                        <text>journal entries</text>
+                    }
+                </li>
+                <li>
+                    <strong>@Model.HomeModel.CategoryCount</strong>
+                    @if (Model.HomeModel.CategoryCount == 1)
+                    {
+                        <text>category</text>
+                    }
+                    else
+                    {
+                        <text>categories</text>
+                    }
+                </li>
+                <li>
+                    <strong>@Model.HomeModel.TagCount</strong> 
+                    @if (Model.HomeModel.TagCount == 1)
+                    {
+                        <text>tag</text>
+                    }
+                    else
+                    {
+                        <text>tags</text>
+                    }
+                </li>
             </ul>
         </section>
     </div>
