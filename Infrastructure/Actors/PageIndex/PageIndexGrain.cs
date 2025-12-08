@@ -10,10 +10,16 @@ public interface IPageIndexGrain : IGrainWithStringKey
 
     [Alias("GetCount")]
     Task<PageIndexCount> GetCount();
-    
+
+    [Alias("GetCategories")]
+    Task<List<PageIndexCategory>> GetCategories();
+
+    [Alias("GetTags")]
+    Task<List<PageIndexTag>> GetTags();
+
     [Alias("GetById")]
     Task<PageIndexEntry?> GetById(string id);
-    
+
     [Alias("GetByType")]
     Task<List<PageIndexEntry>> GetByType(string type);
 
@@ -64,6 +70,40 @@ public class PageIndexGrain(
             CategoryCount = categoryCount,
             TagCount = tagCount
         });
+    }
+
+    public Task<List<PageIndexCategory>> GetCategories()
+    {
+        var categories = profile.State.Pages.Values
+            .Where(e => !string.IsNullOrEmpty(e.Category))
+            .Distinct()
+            .GroupBy(e => e.Category)
+            .Select(g => new PageIndexCategory
+            {
+                Name = g.Key!,
+                PageCount = g.Count()
+            })
+            .OrderBy(c => c.Name)
+            .ToList();
+
+        return Task.FromResult(categories);
+    }
+
+    public Task<List<PageIndexTag>> GetTags()
+    {
+        var tags = profile.State.Pages.Values
+            .SelectMany(e => e.Tags)
+            .Distinct()
+            .GroupBy(t => t)
+            .Select(g => new PageIndexTag
+            {
+                Name = g.Key,
+                PageCount = g.Count()
+            })
+            .OrderBy(t => t.Name)
+            .ToList();
+
+        return Task.FromResult(tags);
     }
 
     public Task<PageIndexEntry?> GetById(string id)
@@ -136,6 +176,26 @@ public class PageIndexCount
     public int CategoryCount { get; init; }
     [Id(4)]
     public int TagCount { get; init; }
+}
+
+[GenerateSerializer]
+[Alias("Actors.PageIndex.PageIndexCategory")]
+public class PageIndexCategory
+{
+    [Id(0)]
+    public required string Name { get; init; }
+    [Id(1)]
+    public required int PageCount { get; init; }
+}
+
+[GenerateSerializer]
+[Alias("Actors.PageIndex.PageIndexTag")]
+public class PageIndexTag
+{
+    [Id(0)]
+    public required string Name { get; init; }
+    [Id(1)]
+    public required int PageCount { get; init; }
 }
 
 [GenerateSerializer]

@@ -5,9 +5,6 @@
         <form method="get" asp-page="/Search">
             <div class="input-group input-group-sm">
                 <input name="q" class="form-control" placeholder="Search notes..." />
-                <button class="btn btn-outline-secondary" type="submit">
-                    <span class="bi bi-search"></span>
-                </button>
             </div>
         </form>
     </div>
@@ -34,23 +31,19 @@
         </ul>
     </div>
 
-    <!-- Categories (hard-coded for now) -->
+    <!-- Categories -->
     <div class="mb-3">
         <div class="fw-semibold small text-uppercase text-muted mb-1">Categories</div>
         <ul class="list-unstyled small mb-0">
-            <li><a asp-page="/Category" asp-route-slug="dev">Development</a></li>
-            <li><a asp-page="/Category" asp-route-slug="ideas">Ideas</a></li>
-            <li><a asp-page="/Category" asp-route-slug="life">Life</a></li>
+            @await Component.InvokeAsync("Categories")
         </ul>
     </div>
 
-    <!-- Tags (hard-coded examples) -->
+    <!-- Tags -->
     <div>
         <div class="fw-semibold small text-uppercase text-muted mb-1">Tags</div>
         <div class="d-flex flex-wrap gap-1 small">
-            <a asp-page="/Tag" asp-route-slug="csharp" class="badge bg-light text-dark border">csharp</a>
-            <a asp-page="/Tag" asp-route-slug="telemetry" class="badge bg-light text-dark border">telemetry</a>
-            <a asp-page="/Tag" asp-route-slug="ai" class="badge bg-light text-dark border">ai</a>
+            @await Component.InvokeAsync("Tags")
         </div>
     </div>
 </nav>
