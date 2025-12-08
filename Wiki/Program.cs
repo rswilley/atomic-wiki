@@ -1,10 +1,10 @@
 using Domain;
 using Domain.Repositories;
 using Infrastructure;
+using Infrastructure.Actors.StartupTasks;
 using Infrastructure.Extensions;
 using Infrastructure.Repositories;
 using Infrastructure.Services;
-using Infrastructure.StartupTasks;
 using Wiki.Services;
 using ISearchRepository = Infrastructure.Repositories.ISearchRepository;
 using MarkdownParser = Infrastructure.MarkdownParser;

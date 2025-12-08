@@ -4,7 +4,7 @@ using Infrastructure.Actors.Page;
 using Infrastructure.Actors.PageIndex;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Infrastructure.StartupTasks;
+namespace Infrastructure.Actors.StartupTasks;
 
 public sealed class SeedInitialPageIndexTask(
     IGrainFactory grainFactory, 
