@@ -1,4 +1,5 @@
 ﻿@page "/view/{permanentId}/{slug}"
+@using Domain.Enums
 @model PageViewModel
 @{
     ViewData["Title"] = Model.Title ?? "View";
@@ -126,6 +127,9 @@ else
                         <h2 class="h6 mb-2">Details</h2>
 
                         <dl class="row small mb-0">
+                            <dt class="col-4 text-muted">PermanentId</dt>
+                            <dd class="col-8 text-capitalize">@Model.PermanentId</dd>
+
                             <dt class="col-4 text-muted">Type</dt>
                             <dd class="col-8 text-capitalize">@Model.Type</dd>
 
@@ -145,7 +149,7 @@ else
                                 </dd>
                             }
 
-                            @if (Model.Type == "journal")
+                            @if (Model.Type == nameof(PageType.Journal).ToLower())
                             {
                                 <dt class="col-4 text-muted">Journal</dt>
                                 <dd class="col-8">
@@ -194,11 +198,28 @@ else
                            class="btn btn-sm btn-primary">
                             Edit
                         </a>
-                        <a asp-page="/Compose"
-                           asp-route-type="note"
-                           class="btn btn-sm btn-outline-secondary">
-                            New note
-                        </a>
+                        @if (Model.Type == nameof(PageType.Note).ToLower())
+                        {
+                            <a asp-page="/Compose"
+                               asp-route-type="note"
+                               class="btn btn-sm btn-outline-secondary">
+                                New Note
+                            </a>
+                        } else if (Model.Type == nameof(PageType.Post).ToLower())
+                        {
+                            <a asp-page="/Compose"
+                               asp-route-type="post"
+                               class="btn btn-sm btn-outline-secondary">
+                                New Post
+                            </a>
+                        } else if (Model.Type == nameof(PageType.Journal).ToLower())
+                        {
+                            <a asp-page="/Compose"
+                               asp-route-type="journal"
+                               class="btn btn-sm btn-outline-secondary">
+                                New Journal Entry
+                            </a>
+                        }
 
                         @* Delete would normally be a POST with confirmation *@
                         @* <form method="post" asp-page-handler="Delete">

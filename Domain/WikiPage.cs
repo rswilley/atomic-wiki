@@ -14,7 +14,6 @@ public record WikiContent
 {
     public PageMeta FrontMatter { get; }
     public string Value { get; }
-    public string Html { get; }
     public string MarkdownBody { get; }
 
     public WikiContent(string? markdown, IMarkdownParser markdownParser)
@@ -23,14 +22,14 @@ public record WikiContent
         if (string.IsNullOrWhiteSpace(Value))
         {
             FrontMatter = new PageMeta();
-            Html = string.Empty;
+            _html = string.Empty;
             MarkdownBody = string.Empty;
         }
         else
         {
             var parsed = markdownParser.Deserialize<PageMeta>(Value);
             FrontMatter = parsed.meta;
-            Html = parsed.html;
+            _html = parsed.html;
             MarkdownBody = parsed.markdownBody;
         }
     }
@@ -39,7 +38,7 @@ public record WikiContent
     {
         string pattern = @"<h1\b[^>]*>(.*?)<\/h1>";
 
-        Match match = Regex.Match(Html, pattern);
+        Match match = Regex.Match(_html, pattern);
         if (match.Success)
         {
             return match.Groups[1].Value;
@@ -47,12 +46,12 @@ public record WikiContent
 
         return "Untitled";
     }
-    
+
     public IReadOnlyCollection<string> GetOutgoingLinks()
     {
         if (string.IsNullOrWhiteSpace(Value))
-            return Array.Empty<string>();
-        
+            return [];
+
         var regex = new Regex(@"\[\[([^|\]]+)(?:\|.*?)?\]\]");
 
         return regex.Matches(Value)
@@ -64,14 +63,14 @@ public record WikiContent
 
     public string ToPlainText()
     {
-        if (string.IsNullOrWhiteSpace(Value)) 
+        if (string.IsNullOrWhiteSpace(Value))
             return string.Empty;
-        
+
         var text = Regex.Replace(Value, @"#{1,6}\s", "");
         return text.Trim();
     }
 
-    public List<string> GetTags(string? tags)
+    public static List<string> GetTags(string? tags)
     {
         return string.IsNullOrEmpty(tags)
             ? []
@@ -91,21 +90,30 @@ public record WikiContent
         return htmlStripped;
     }
 
-    public string RemoveTitleFromHtml()
+    public string ToRenderedContent()
+    {
+        var html = RemoveTitleFromHtml();
+        // TODO handle internal links
+        return html;
+    }
+
+    private readonly string _html;
+
+    private string RemoveTitleFromHtml()
     {
         string pattern = @"<h1\b[^>]*>(.*?)<\/h1>";
         string title = "";
 
-        Match match = Regex.Match(Html, pattern);
+        Match match = Regex.Match(_html, pattern);
         if (match.Success)
         {
             title = match.Groups[1].Value;
         }
 
         if (string.IsNullOrEmpty(title))
-            return Html;
+            return _html;
 
-        return Html.Replace(title, "");
+        return _html.Replace(title, "");
     }
 }
 
