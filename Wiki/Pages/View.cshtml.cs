@@ -65,7 +65,7 @@ public class PageViewModel(
         CreatedAt = page.Content.FrontMatter.CreatedAt;
         UpdatedAt = page.Content.FrontMatter.UpdatedAt;
 
-        RenderedContent = page.Content.RemoveTitleFromHtml();
+        RenderedContent = page.Content.ToRenderedContent();
     }
 }
 

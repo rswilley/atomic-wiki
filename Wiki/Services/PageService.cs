@@ -74,7 +74,7 @@ public class PageService(
             PermanentId = permanentId,
             Type = model.Type.ToLower(),
             Category = model.Category,
-            Tags = wikiContent.GetTags(model.Tags),
+            Tags = WikiContent.GetTags(model.Tags),
             Pinned = model.IsPinned,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
@@ -93,7 +93,7 @@ public class PageService(
             PermanentId = model.Id,
             Type = model.Type.ToLower(),
             Category = model.Category,
-            Tags = wikiContent.GetTags(model.Tags),
+            Tags = WikiContent.GetTags(model.Tags),
             Pinned = model.IsPinned,
             CreatedAt = model.CreatedAt,
             UpdatedAt = DateTime.UtcNow
