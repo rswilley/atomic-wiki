@@ -69,7 +69,7 @@ public class PageGrain(
         await SavePageDocument(fileName);
         SaveSearchIndex();
 
-        await HandleSetTags([], _page.Content.FrontMatter.Tags ?? []);
+        //await HandleSetTags([], _page.Content.FrontMatter.Tags ?? []);
         await HandleUpdatedOutgoingLinks([], _page.Content.GetOutgoingLinks());
 
         var pageIndexGrain = grainFactory.GetGrain<IPageIndexGrain>("index");
@@ -80,6 +80,7 @@ public class PageGrain(
             Type = _page.Content.FrontMatter.Type,
             CreatedAt = _page.Content.FrontMatter.CreatedAt ?? DateTime.UtcNow,
             UpdatedAt = _page.Content.FrontMatter.UpdatedAt ?? DateTime.UtcNow,
+            Category = _page.Content.FrontMatter.Category,
             Tags = _page.Content.FrontMatter.Tags ?? [],
             IsPinned = _page.Content.FrontMatter.Pinned ?? false,
             Excerpt = _page.Content.GetExcerpt()
@@ -127,6 +128,7 @@ public class PageGrain(
             Type = _page.Content.FrontMatter.Type,
             CreatedAt = _page.Content.FrontMatter.CreatedAt ?? DateTime.UtcNow,
             UpdatedAt = _page.Content.FrontMatter.UpdatedAt ?? DateTime.UtcNow,
+            Category = _page.Content.FrontMatter.Category,
             Tags = _page.Content.FrontMatter.Tags ?? [],
             IsPinned = _page.Content.FrontMatter.Pinned ?? false,
             Excerpt = _page.Content.GetExcerpt()
