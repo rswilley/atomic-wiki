@@ -19,7 +19,7 @@
     </style>
 }
 
-<h1 class="h4 mb-1">#@Model.TagName</h1>
+<h1 class="h4 mb-1">#@Model.Slug</h1>
 
 @if (!string.IsNullOrWhiteSpace(Model.Description))
 {
@@ -107,7 +107,8 @@ else
                             </div>
 
                             <h2 class="h6 mb-1">
-                                <a asp-page="/Page"
+                                <a asp-page="/View"
+                                   asp-route-permanentId="@item.PermanentId"
                                    asp-route-slug="@item.Slug"
                                    class="stretched-link text-decoration-none">
                                     @item.Title

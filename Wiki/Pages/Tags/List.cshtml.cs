@@ -1,9 +1,11 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Domain.ValueObject;
+using Infrastructure.Actors.PageIndex;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace Wiki.Pages.Tags;
 
-public class TagListModel : PageModel
+public class TagListModel(IGrainFactory grainFactory) : PageModel
 {
     [FromRoute]
     public string Slug { get; set; } = "";
@@ -17,7 +19,7 @@ public class TagListModel : PageModel
 
     public List<TagItem> Items { get; set; } = new();
 
-    public void OnGet(string? q, string? type, string? order)
+    public async Task OnGetAsync(string? q, string? type, string? order)
     {
         Query = q;
         TypeFilter = type;
@@ -26,56 +28,22 @@ public class TagListModel : PageModel
         // Map slug -> tag name (placeholder – replace with DB lookup)
         TagName = Slug.Replace("-", " ", StringComparison.OrdinalIgnoreCase);
 
-        // Optional: human descriptions for some tags
-        Description = Slug switch
-        {
-            "orleans"      => "All notes, posts, and journal entries related to Orleans and actor patterns.",
-            "telemetry"    => "Anything about telemetry pipelines, metrics, and event ingestion.",
-            "ai"           => "AI visuals, generation workflows, and experiments.",
-            "atomic-wiki"  => "Meta notes and posts about Atomic Wiki itself.",
-            _ => null
-        };
-
-        // TODO: Replace with real DB query where TagSlug == Slug
-        var sample = new List<TagItem>
-        {
-            new TagItem
-            {
-                Title = "Orleans concurrency patterns",
-                Slug = "orleans-concurrency-patterns",
-                Type = "note",
-                Summary = "Grain reentrancy, bulkhead pattern, and ordering concerns.",
-                Category = "Development",
-                UpdatedAt = DateTime.Today.AddDays(-1),
-                Tags = new[] { "orleans", "telemetry" }
-            },
-            new TagItem
-            {
-                Title = "Telemetry cluster design notes",
-                Slug = "telemetry-cluster-design",
-                Type = "note",
-                Summary = "Cluster layout, queues, and Orleans grains for telemetry.",
-                Category = "Development",
-                UpdatedAt = DateTime.Today.AddDays(-3),
-                Tags = new[] { "telemetry" }
-            },
-            new TagItem
-            {
-                Title = "AI visual workflow for techno mixes",
-                Slug = "ai-visual-workflow",
-                Type = "post",
-                Summary = "Deforum / SD pipeline, keyframes, and render settings.",
-                Category = "Visuals",
-                UpdatedAt = DateTime.Today.AddDays(-5),
-                Tags = new[] { "ai", "visuals", "music" }
-            }
-        };
-
         // Filter down to items that actually have this tag
-        IEnumerable<TagItem> queryable = sample.Where(i =>
-            i.Tags != null &&
-            i.Tags.Any(t => t.Equals(TagName, StringComparison.OrdinalIgnoreCase) ||
-                            t.Equals(Slug, StringComparison.OrdinalIgnoreCase)));
+        var pageIndexGrain = grainFactory.GetGrain<IPageIndexGrain>("index");
+        var state = await pageIndexGrain.GetState();
+        var queryable = state.Pages.Values
+            .Where(e => Slug == "untagged" ? e.Tags is [] : e.Tags.Contains(Slug))
+            .Select(e => new TagItem
+            {
+                PermanentId = e.Id,
+                Title = e.Title,
+                Slug = new Slug(e.Title).SlugValue,
+                Type = e.Type,
+                Summary = e.Excerpt,
+                Category = e.Category,
+                Tags = e.Tags,
+                UpdatedAt = e.UpdatedAt
+            });
 
         // Filter by type
         if (!string.IsNullOrWhiteSpace(TypeFilter))
@@ -103,13 +71,14 @@ public class TagListModel : PageModel
 
 public class TagItem
 {
+    public required string PermanentId { get; set; }
     public string Title { get; set; } = "";
     public string Slug { get; set; } = "";
     public string Type { get; set; } = "note"; // note | post | journal
 
     public string? Summary { get; set; }
     public string? Category { get; set; }
-    public string[]? Tags { get; set; }
+    public IEnumerable<string>? Tags { get; set; }
 
     public DateTime UpdatedAt { get; set; }
 
