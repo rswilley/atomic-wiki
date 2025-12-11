@@ -2,6 +2,6 @@
 
 @foreach (var tag in Model)
 {
-    <a asp-page="/Tags/List" asp-route-slug="@tag.Slug" class="badge bg-light text-dark border">@tag.Slug</a>
+    <a asp-page="/Tags/List" asp-route-nameEncoded="@tag.NameEncoded" class="badge bg-light text-dark border">@tag.Slug</a>
 }
-<a asp-page="/Tags/List"  asp-route-slug="untagged" class="badge bg-light text-dark border">untagged</a>
+<a asp-page="/Tags/List"  asp-route-nameEncoded="untagged" class="badge bg-light text-dark border">untagged</a>

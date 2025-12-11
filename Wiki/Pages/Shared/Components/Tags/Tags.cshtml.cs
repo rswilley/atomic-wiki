@@ -27,6 +27,7 @@ public class TagsList
     public class TagsModel
     {
         public required string Name { get; init; }
+        public string NameEncoded => Uri.EscapeDataString(Name);
         public required string Slug { get; init; }
         public required int PageCount { get; init; }
     }
