@@ -8,6 +8,7 @@ namespace Wiki.Pages.Tags;
 public class TagListModel(IGrainFactory grainFactory) : PageModel
 {
     [FromRoute]
+    public string NameEncoded { get; set; } = "";
     public string Slug { get; set; } = "";
 
     public string TagName { get; set; } = "";
@@ -25,14 +26,15 @@ public class TagListModel(IGrainFactory grainFactory) : PageModel
         TypeFilter = type;
         Order = string.IsNullOrWhiteSpace(order) ? "desc" : order.ToLowerInvariant();
 
-        // Map slug -> tag name (placeholder – replace with DB lookup)
-        TagName = Slug.Replace("-", " ", StringComparison.OrdinalIgnoreCase);
+        // Map slug -> tag name
+        TagName = Uri.UnescapeDataString(NameEncoded);
+        Slug = new Slug(TagName).SlugValue;
 
         // Filter down to items that actually have this tag
         var pageIndexGrain = grainFactory.GetGrain<IPageIndexGrain>("index");
         var state = await pageIndexGrain.GetState();
         var queryable = state.Pages.Values
-            .Where(e => Slug == "untagged" ? e.Tags is [] : e.Tags.Contains(Slug))
+            .Where(e => TagName == "untagged" ? e.Tags is [] : e.Tags.Contains(TagName))
             .Select(e => new TagItem
             {
                 PermanentId = e.Id,

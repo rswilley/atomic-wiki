@@ -27,6 +27,7 @@ public class CategoriesList
     public class CategoriesModel
     {
         public required string Name { get; init; }
+        public string NameEncoded => Uri.EscapeDataString(Name);
         public required string Slug { get; init; }
         public required int PageCount { get; init; }
     }

@@ -1,4 +1,4 @@
-﻿@page "/categories/{slug}"
+﻿@page "/categories/{nameEncoded}"
 @model CategoryListModel
 @{
     ViewData["Title"] = $"Category: {Model.CategoryName}";
@@ -19,7 +19,7 @@
     </style>
 }
 
-<h1 class="h4 mb-1">@Model.CategoryName</h1>
+<h1 class="h4 mb-1" style="text-transform: capitalize">@Model.CategoryName</h1>
 
 @if (!string.IsNullOrWhiteSpace(Model.Description))
 {
@@ -107,7 +107,8 @@ else
                             </div>
 
                             <h2 class="h6 mb-1">
-                                <a asp-page="/Page"
+                                <a asp-page="/View"
+                                   asp-route-permanentId="@item.PermanentId"
                                    asp-route-slug="@item.Slug"
                                    class="stretched-link text-decoration-none">
                                     @item.Title
