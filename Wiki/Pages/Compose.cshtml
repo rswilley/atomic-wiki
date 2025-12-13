@@ -147,19 +147,47 @@
 
             // Tagify category
             var category = document.querySelector('input[name="Category"]');
-            new Tagify(category, {
+            var categoryTagify = new Tagify(category, {
                 enforceWhitelist: false,
                 mode : "select",
-                whitelist: ["first option", "second option", "third option"],
+                dropdown: { enabled: 1, maxItems: 8, closeOnSelect: true },
                 originalInputValueFormat: valuesArr => valuesArr.map(x => x.value).join(",")
+            });
+
+            categoryTagify.on('input', async function (e) {
+                const value = (e.detail.value || "").trim();
+                if (value.length < 1) return;
+
+                const url = `@Url.Page("Compose", null, new { handler = "CategorySuggestions" })&q=${encodeURIComponent(value)}`;
+                const res = await fetch(url);
+                if (!res.ok) return;
+
+                const suggestions = await res.json();
+                // Normalize to Tagify's canonical format
+                categoryTagify.whitelist = (suggestions || []).map(v => ({ value: v }));
+                categoryTagify.dropdown.show(value);
             });
 
             // Tagify tags
             var tags = document.querySelector('input[name="Tags"]');
-            new Tagify(tags, {
+            var tagsTagify = new Tagify(tags, {
                 delimiters: ",",
-                dropdown: { enabled: 0 },
+                dropdown: { enabled: 1, maxItems: 8, closeOnSelect: false },
                 originalInputValueFormat: valuesArr => valuesArr.map(x => x.value).join(",")
+            });
+
+            tagsTagify.on('input', async function (e) {
+                const value = (e.detail.value || "").trim();
+                if (value.length < 1) return;
+
+                const url = `@Url.Page("Compose", null, new { handler = "TagSuggestions" })&q=${encodeURIComponent(value)}`;
+                const res = await fetch(url);
+                if (!res.ok) return;
+
+                const suggestions = await res.json();
+                // Normalize to Tagify's canonical format
+                tagsTagify.whitelist = (suggestions || []).map(v => ({ value: v }));
+                tagsTagify.dropdown.show(value);
             });
         });
     </script>

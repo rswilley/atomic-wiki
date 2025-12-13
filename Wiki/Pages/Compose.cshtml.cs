@@ -1,12 +1,16 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using Domain.Enums;
+using Infrastructure.Actors.PageIndex;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
 using Wiki.Models;
 using Wiki.Services;
 
 namespace Wiki.Pages;
 
-public class ComposeModel(IPageService pageService) : Microsoft.AspNetCore.Mvc.RazorPages.PageModel
+public class ComposeModel(
+    IGrainFactory grainFactory,
+    IPageService pageService) : PageModel
 {
     private static readonly string[] AllowedTypes = [
         nameof(PageType.Note).ToLower(),
@@ -160,6 +164,30 @@ public class ComposeModel(IPageService pageService) : Microsoft.AspNetCore.Mvc.R
             await pageService.Update((PageUpdateModel)page);
         }
         return RedirectBasedOnType(Type);
+    }
+    
+    public async Task<IActionResult> OnGetTagSuggestions(string? q)
+    {
+        var pageIndexGrain = grainFactory.GetGrain<IPageIndexGrain>("index");
+        var all = (await pageIndexGrain.GetTags()).Select(t => t.Name).ToArray();
+
+        var filtered = string.IsNullOrWhiteSpace(q)
+            ? all
+            : all.Where(t => t.Contains(q, StringComparison.OrdinalIgnoreCase)).ToArray();
+
+        return new JsonResult(filtered);
+    }
+    
+    public async Task<IActionResult> OnGetCategorySuggestions(string? q)
+    {
+        var pageIndexGrain = grainFactory.GetGrain<IPageIndexGrain>("index");
+        var all = (await pageIndexGrain.GetCategories()).Select(t => t.Name).ToArray();
+
+        var filtered = string.IsNullOrWhiteSpace(q)
+            ? all
+            : all.Where(t => t.Contains(q, StringComparison.OrdinalIgnoreCase)).ToArray();
+
+        return new JsonResult(filtered);
     }
 
     private RedirectToPageResult RedirectBasedOnType(string type)
