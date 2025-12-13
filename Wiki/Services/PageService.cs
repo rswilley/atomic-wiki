@@ -14,6 +14,7 @@ public interface IPageService
     Task<List<NoteListItem>> GetNotes();
     Task<List<JournalEntryItem>> GetJournals();
     Task<List<PostListItem>> GetPosts();
+    Task<List<TimelineGroup>> GetTimeline();
     Task<string> Save(PageWriteModel model);
     Task<string> Update(PageUpdateModel model);
 }
@@ -78,6 +79,29 @@ public class PageService(
             Excerpt = p.Excerpt,
             Tags = p.Tags
         }).ToList();
+    }
+
+    public async Task<List<TimelineGroup>> GetTimeline()
+    {
+        var pageIndexGrain = grainFactory.GetGrain<IPageIndexGrain>("index");
+        return ((await pageIndexGrain.GetAll()).GroupBy(x => x.CreatedAt.Date)
+            .OrderByDescending(g => g.Key)
+            .Select(g => new TimelineGroup
+            {
+                Date = g.Key,
+                Items = g.Select(i => new TimelineItem
+                {
+                    Id = i.Id,
+                    Date = i.CreatedAt,
+                    Title = i.Title,
+                    Slug = new Slug(i.Title).SlugValue,
+                    Type = i.Type,
+                    Excerpt = i.Excerpt,
+                    Tags = i.Tags,
+                    IsPinned = i.IsPinned
+                }).OrderByDescending(x => x.Date).ToList()
+            })
+            .ToList());
     }
 
     public async Task<string> Save(PageWriteModel model)
