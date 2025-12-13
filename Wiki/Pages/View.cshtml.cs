@@ -1,4 +1,5 @@
 ﻿using Domain.ValueObject;
+using Infrastructure.Actors.PageIndex;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Wiki.Services;
@@ -6,6 +7,7 @@ using Wiki.Services;
 namespace Wiki.Pages;
 
 public class PageViewModel(
+    IGrainFactory grainFactory,
     IPageService pageService) : PageModel
 {
     [FromRoute]
@@ -65,7 +67,8 @@ public class PageViewModel(
         CreatedAt = page.Content.FrontMatter.CreatedAt;
         UpdatedAt = page.Content.FrontMatter.UpdatedAt;
 
-        RenderedContent = page.Content.ToRenderedContent();
+        var pageIndexGrain = grainFactory.GetGrain<IPageIndexGrain>("index");
+        RenderedContent = new WikiLinkParser().ToHtmlLinks(page.Content.ToRenderedContent(), pageIndexGrain);
     }
 }
 

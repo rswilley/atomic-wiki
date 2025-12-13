@@ -93,7 +93,6 @@ public record WikiContent
     public string ToRenderedContent()
     {
         var html = RemoveTitleFromHtml();
-        // TODO handle internal links
         return html;
     }
 
