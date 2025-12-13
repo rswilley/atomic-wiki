@@ -13,6 +13,7 @@ public interface IPageService
     Task<WikiPage?> GetPage(string id);
     Task<List<NoteListItem>> GetNotes();
     Task<List<JournalEntryItem>> GetJournals();
+    Task<List<PostListItem>> GetPosts();
     Task<string> Save(PageWriteModel model);
     Task<string> Update(PageUpdateModel model);
 }
@@ -60,6 +61,20 @@ public class PageService(
             Title = p.Title,
             Slug = new Slug(p.Title).SlugValue,
             Date = p.CreatedAt,
+            Excerpt = p.Excerpt,
+            Tags = p.Tags
+        }).ToList();
+    }
+
+    public async Task<List<PostListItem>> GetPosts()
+    {
+        var pageIndexGrain = grainFactory.GetGrain<IPageIndexGrain>("index");
+        return (await pageIndexGrain.GetByType(nameof(PageType.Post).ToLower())).Select(p => new PostListItem
+        {
+            Id = p.Id,
+            Title = p.Title,
+            Slug = new Slug(p.Title).SlugValue,
+            CreatedAt = p.CreatedAt,
             Excerpt = p.Excerpt,
             Tags = p.Tags
         }).ToList();

@@ -74,17 +74,18 @@
                             </div>
 
                             <h2 class="h6 mb-2">
-                                <a asp-page="/Post"
+                                <a asp-page="/View"
+                                   asp-route-permanentId="@post.Id"
                                    asp-route-slug="@post.Slug"
                                    class="stretched-link text-decoration-none">
                                     @post.Title
                                 </a>
                             </h2>
 
-                            @if (!string.IsNullOrWhiteSpace(post.Summary))
+                            @if (!string.IsNullOrWhiteSpace(post.Excerpt))
                             {
                                 <p class="card-text small text-muted mb-2">
-                                    @post.Summary
+                                    @post.Excerpt
                                 </p>
                             }
 
@@ -109,7 +110,7 @@
     {
         <p class="text-muted small">
             No posts found.
-            <a asp-page="/NewPost">Create your first post</a>.
+            <a asp-page="/Compose" asp-route-type="post">Create your first post</a>.
         </p>
     }
 </section>
