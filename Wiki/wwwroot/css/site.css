@@ -12,10 +12,20 @@ html {
   height: 100vh;
 }
 
-/* Sidebar base */
+/* Fixed-width sidebar on desktop */
 .atomic-sidebar {
+  flex: 0 0 280px;     /* don't grow, don't shrink, fixed basis */
+  width: 280px;        /* explicit width for clarity */
+  max-width: 280px;
+  min-width: 280px;
   background-color: #f8f9fa;
   overflow-y: auto;
+}
+
+/* Make sidebar usable when content is tall */
+.atomic-sidebar {
+  height: 100vh;       /* full viewport height */
+  overflow-y: auto;    /* scroll inside the sidebar */
 }
 
 /* Desktop sidebar: fixed width */
