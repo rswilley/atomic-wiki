@@ -15,6 +15,7 @@
         type="text/css"
         href="https://unpkg.com/tiny-markdown-editor/dist/tiny-mde.min.css"
     />
+    <link rel="stylesheet" href="~/lib/tagify/dist/tagify.css">
     <script src="https://unpkg.com/tiny-markdown-editor/dist/tiny-mde.min.js"></script>
 }
 
@@ -124,6 +125,7 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script src="~/lib/tagify/dist/tagify.js"></script>
     <script>
         function updateComposeVisibility() {
             var type = document.querySelector('input[name="Type"]:checked')?.value || "note";
@@ -142,6 +144,23 @@
 
         document.addEventListener('DOMContentLoaded', function () {
             updateComposeVisibility();
+
+            // Tagify category
+            var category = document.querySelector('input[name="Category"]');
+            new Tagify(category, {
+                enforceWhitelist: false,
+                mode : "select",
+                whitelist: ["first option", "second option", "third option"],
+                originalInputValueFormat: valuesArr => valuesArr.map(x => x.value).join(",")
+            });
+
+            // Tagify tags
+            var tags = document.querySelector('input[name="Tags"]');
+            new Tagify(tags, {
+                delimiters: ",",
+                dropdown: { enabled: 0 },
+                originalInputValueFormat: valuesArr => valuesArr.map(x => x.value).join(",")
+            });
         });
     </script>
 }

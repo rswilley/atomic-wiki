@@ -74,7 +74,10 @@ public record WikiContent
     {
         return string.IsNullOrEmpty(tags)
             ? []
-            : tags.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries).ToList();
+            : tags.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries)
+                .Select(t => t.ToLowerInvariant())
+                .Distinct()
+                .ToList();
     }
 
     public string GetExcerpt()
