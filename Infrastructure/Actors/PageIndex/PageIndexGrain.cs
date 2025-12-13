@@ -22,6 +22,9 @@ public interface IPageIndexGrain : IGrainWithStringKey
 
     [Alias("GetByType")]
     Task<List<PageIndexEntry>> GetByType(string type);
+    
+    [Alias("GetAll")]
+    Task<List<PageIndexEntry>> GetAll();
 
     [Alias("AddToIndex")]
     Task AddToIndex(PageIndexEntry entry);
@@ -115,6 +118,14 @@ public class PageIndexGrain(
     {
         var results = profile.State.Pages.Values
             .Where(e => string.Equals(e.Type, type, StringComparison.OrdinalIgnoreCase))
+            .OrderByDescending(e => e.UpdatedAt)
+            .ToList();
+        return Task.FromResult(results);
+    }
+
+    public Task<List<PageIndexEntry>> GetAll()
+    {
+        var results = profile.State.Pages.Values
             .OrderByDescending(e => e.UpdatedAt)
             .ToList();
         return Task.FromResult(results);

@@ -122,11 +122,12 @@
                             <article class="card card-body py-2 px-3 mb-2 timeline-item">
                                 <div class="d-flex justify-content-between align-items-start">
                                     <div>
-                                        <a asp-page="/Page" asp-route-slug="@item.Slug" class="fw-semibold">
+                                        <a asp-page="/View" 
+                                           asp-route-permanentId="@item.Id"
+                                           asp-route-slug="@item.Slug" class="fw-semibold">
                                             @item.Title
                                         </a>
                                         <div class="small text-muted">
-                                            @item.Time?.ToString(@"hh\:mm") ?? "--:--"
                                             &nbsp;•&nbsp; @item.Type
                                             @if (item.Tags?.Any() == true)
                                             {
@@ -143,10 +144,10 @@
                                     }
                                 </div>
 
-                                @if (!string.IsNullOrWhiteSpace(item.Summary))
+                                @if (!string.IsNullOrWhiteSpace(item.Excerpt))
                                 {
                                     <p class="small mb-0 mt-1 text-muted">
-                                        @item.Summary
+                                        @item.Excerpt
                                     </p>
                                 }
                             </article>
@@ -158,6 +159,6 @@
     }
     else
     {
-        <p class="text-muted small">No entries found yet. Start by creating a <a asp-page="/NewNote">new note</a>.</p>
+        <p class="text-muted small">No entries found yet. Start by creating a <a asp-page="/Compose">new entry</a>.</p>
     }
 </section>
