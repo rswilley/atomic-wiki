@@ -11,6 +11,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
 
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/lib/typeahead/jquery.typeahead.min.css">
     <link rel="stylesheet" href="~/css/site.css" />
     @await RenderSectionAsync("Styles", required: false)
 </head>
@@ -60,8 +61,48 @@
     </div>
 </div>
 
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
 <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+<script src="~/lib/typeahead/jquery.typeahead.min.js"></script>
 <script src="~/js/site.js"></script>
+
+<script>
+    $(function () {
+        $.typeahead({
+            input: '.js-typeahead',
+            minLength: 1,
+            dynamic: true,
+            delay: 500,
+            template: function (query, item) {
+                console.log(item);
+                return "{{title}}";
+            },
+            emptyTemplate: "No results for {{query}}",
+            source: {
+                items: {
+                    display: ["name", "nameNormalized", "type", "aliases"],
+                    ajax: function (query) {
+                        return {
+                            type: "POST",
+                            url: "@Url.Page("Search", null, new { handler = "SearchPages" })",
+                            headers: {
+                                "RequestVerificationToken": $('input[name="__RequestVerificationToken"]').val()
+                            },
+                            data: {
+                                query: "{{query}}"
+                            }
+                        }
+                    }
+                }
+            },
+            callback: {
+                onClick: function (node, a, item, event) {
+                    console.log(item);
+                }
+            }
+        });
+    });
+</script>
 
 @await RenderSectionAsync("Scripts", required: false)
 </body>

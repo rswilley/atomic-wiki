@@ -2,9 +2,11 @@
     <!-- Search -->
     <div class="mb-3">
         <label class="form-label small text-muted">Search</label>
-        <form method="get" asp-page="/Search">
-            <div class="input-group input-group-sm">
-                <input name="q" class="form-control" placeholder="Search notes..." />
+        <form id="search-form" method="post">
+            <div class="text-center typeahead__container">
+                <div class="input-group input-group-sm typeahead__field">
+                    <input type="text" name="q" class="form-control js-typeahead" placeholder="Search..." autocomplete="off">
+                </div>
             </div>
         </form>
     </div>

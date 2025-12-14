@@ -1,8 +1,10 @@
-﻿using Microsoft.AspNetCore.Mvc.RazorPages;
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
+using Wiki.Services;
 
 namespace Wiki.Pages;
 
-public class SearchModel : PageModel
+public class SearchModel(ISearchService searchService) : PageModel
 {
     // Inputs
     public string? Query { get; set; }
@@ -68,6 +70,16 @@ public class SearchModel : PageModel
         };
 
         Results = queryable.ToList();
+    }
+    
+    public IActionResult OnPostSearchPages(string query)
+    {
+        var results = searchService.Search(query);
+        return new JsonResult(results.Select(r => new
+        {
+            id = r.PermanentId,
+            title = r.Title
+        }));
     }
 
     private List<SearchResultItem> GetSampleData() =>
