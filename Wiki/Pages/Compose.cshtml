@@ -141,10 +141,8 @@
                 if (pinnedSection) pinnedSection.classList.remove('d-none');
             }
         }
-
-        document.addEventListener('DOMContentLoaded', function () {
-            updateComposeVisibility();
-
+        
+        function tagifyCategory() {
             // Tagify category
             var category = document.querySelector('input[name="Category"]');
             var categoryTagify = new Tagify(category, {
@@ -154,12 +152,17 @@
                 originalInputValueFormat: valuesArr => valuesArr.map(x => x.value).join(",")
             });
 
+            let abortController;
+
             categoryTagify.on('input', async function (e) {
                 const value = (e.detail.value || "").trim();
                 if (value.length < 1) return;
 
+                abortController?.abort();
+                abortController = new AbortController();
+
                 const url = `@Url.Page("Compose", null, new { handler = "CategorySuggestions" })&q=${encodeURIComponent(value)}`;
-                const res = await fetch(url);
+                const res = await fetch(url, { signal: abortController.signal });
                 if (!res.ok) return;
 
                 const suggestions = await res.json();
@@ -167,7 +170,9 @@
                 categoryTagify.whitelist = (suggestions || []).map(v => ({ value: v }));
                 categoryTagify.dropdown.show(value);
             });
+        }
 
+        function tagifyTags() {
             // Tagify tags
             var tags = document.querySelector('input[name="Tags"]');
             var tagsTagify = new Tagify(tags, {
@@ -176,12 +181,17 @@
                 originalInputValueFormat: valuesArr => valuesArr.map(x => x.value).join(",")
             });
 
+            let abortController;
+
             tagsTagify.on('input', async function (e) {
                 const value = (e.detail.value || "").trim();
                 if (value.length < 1) return;
 
+                abortController?.abort();
+                abortController = new AbortController();
+
                 const url = `@Url.Page("Compose", null, new { handler = "TagSuggestions" })&q=${encodeURIComponent(value)}`;
-                const res = await fetch(url);
+                const res = await fetch(url, { signal: abortController.signal });
                 if (!res.ok) return;
 
                 const suggestions = await res.json();
@@ -189,6 +199,12 @@
                 tagsTagify.whitelist = (suggestions || []).map(v => ({ value: v }));
                 tagsTagify.dropdown.show(value);
             });
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            updateComposeVisibility();
+            tagifyCategory();
+            tagifyTags();
         });
     </script>
 }
