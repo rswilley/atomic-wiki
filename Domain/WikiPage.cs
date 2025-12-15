@@ -63,10 +63,10 @@ public record WikiContent
 
     public string ToPlainText()
     {
-        if (string.IsNullOrWhiteSpace(Value))
+        if (string.IsNullOrWhiteSpace(MarkdownBody))
             return string.Empty;
 
-        var text = Regex.Replace(Value, @"#{1,6}\s", "");
+        var text = Regex.Replace(MarkdownBody, @"#{1,6}\s", "");
         return text.Trim();
     }
 
@@ -97,6 +97,13 @@ public record WikiContent
     {
         var html = RemoveTitleFromHtml();
         return html;
+    }
+
+    public string ToSearchContent()
+    {
+        var html = RemoveTitleFromHtml();
+        var htmlStripped = Regex.Replace(html, "<.*?>", string.Empty);
+        return htmlStripped;
     }
 
     private readonly string _html;
