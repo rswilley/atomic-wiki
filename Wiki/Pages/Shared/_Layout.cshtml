@@ -75,16 +75,16 @@
             delay: 500,
             template: function (query, item) {
                 console.log(item);
-                return "{{title}}";
+                return "{{title}}<br/>{{snippet}}";
             },
             emptyTemplate: "No results for {{query}}",
             source: {
                 items: {
-                    display: ["name", "nameNormalized", "type", "aliases"],
+                    display: ["title", "snippet"],
                     ajax: function (query) {
                         return {
                             type: "POST",
-                            url: "@Url.Page("Search", null, new { handler = "SearchPages" })",
+                            url: "@Url.Page("Search","SearchPages")",
                             headers: {
                                 "RequestVerificationToken": $('input[name="__RequestVerificationToken"]').val()
                             },
@@ -97,7 +97,8 @@
             },
             callback: {
                 onClick: function (node, a, item, event) {
-                    console.log(item);
+                    event.preventDefault();
+                    window.location.href = "/View/" + item.permanentId + "/" + item.slug;
                 }
             }
         });

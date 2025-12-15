@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Domain.ValueObject;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Wiki.Services;
 
@@ -77,8 +78,10 @@ public class SearchModel(ISearchService searchService) : PageModel
         var results = searchService.Search(query);
         return new JsonResult(results.Select(r => new
         {
-            id = r.PermanentId,
-            title = r.Title
+            permanentId = r.PermanentId,
+            snippet = r.Snippet,
+            title = r.Title,
+            slug = new Slug(r.Title).SlugValue
         }));
     }
 

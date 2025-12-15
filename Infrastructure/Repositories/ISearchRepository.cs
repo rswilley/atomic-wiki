@@ -38,8 +38,11 @@ public class LuceneRepository(IConfigurationService configurationService) : ISea
 
     public void Update(PageSearchItem item)
     {
-        DeleteById(item.PermanentId);
-        Create(item);
+        using LuceneDirectory indexDir = FSDirectory.Open(_indexPath);
+        using IndexWriter writer = new IndexWriter(indexDir, GetIndexWriterConfig().config);
+
+        writer.UpdateDocument(new Term(nameof(PageSearchItem.PermanentId), item.PermanentId), item.ToDocument());
+        writer.Commit();
     }
 
     public void DeleteById(string permanentId)
@@ -95,7 +98,7 @@ public class LuceneRepository(IConfigurationService configurationService) : ISea
     {
         var snippets = new List<SearchSnippet>();
         var scorer = new QueryScorer(query);
-        var highlighter = new Highlighter(new SimpleHTMLFormatter("==", "=="), scorer)
+        var highlighter = new Highlighter(new SimpleHTMLFormatter("<b>", "</b>"), scorer)
         {
             // Set fragment size (characters)
             TextFragmenter = new SimpleFragmenter(150)
