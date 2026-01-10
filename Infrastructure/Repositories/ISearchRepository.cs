@@ -65,11 +65,18 @@ public class LuceneRepository(IConfigurationService configurationService) : ISea
         var analyzer = GetStandardAnalyzer();
         var parser = new MultiFieldQueryParser(
             _luceneVersion,
-            [nameof(PageSearchItem.Title), nameof(PageSearchItem.Body)],
+            [
+                nameof(PageSearchItem.Title), 
+                nameof(PageSearchItem.Body),
+                nameof(PageSearchItem.Headings),
+                nameof(PageSearchItem.Tags),
+            ],
             analyzer, new Dictionary<string, float>
             {
-                { nameof(PageSearchItem.Title), 2.0f }, // Boost title field
-                { nameof(PageSearchItem.Body), 1.0f }   // Default boost for body
+                { nameof(PageSearchItem.Title), 4.0f },
+                { nameof(PageSearchItem.Headings), 2.5f },
+                { nameof(PageSearchItem.Tags), 2.0f },
+                { nameof(PageSearchItem.Body), 1.0f }
             }
         );
 
@@ -164,6 +171,7 @@ public class PageSearchItem
 {
     public required string PermanentId { get; set; }
     public string Title { get; set; } = "";
+    public List<string> Headings { get; set; } = [];
     public string Body { get; set; } = "";
     public List<string> Tags { get; set; } = [];
     
@@ -176,6 +184,11 @@ public class PageSearchItem
             new TextField(nameof(Body), Body, Field.Store.YES)
         };
 
+        foreach (var heading in Headings)
+        {
+            doc.Fields.Add(new StringField(nameof(Headings), heading, Field.Store.YES));
+        }
+        
         foreach (var tag in Tags)
         {
             doc.Fields.Add(new StringField(nameof(Tags), tag, Field.Store.YES));
@@ -186,6 +199,12 @@ public class PageSearchItem
     
     public static PageSearchItem ToPageSearchItem(Document document)
     {
+        var headings = new List<string>();
+        foreach (var field in document.Fields.Where(f => f.Name == nameof(Headings)))
+        {
+            headings.Add(field.GetStringValue());
+        }
+        
         var tags = new List<string>();
         foreach (var field in document.Fields.Where(f => f.Name == nameof(Tags)))
         {
@@ -196,6 +215,7 @@ public class PageSearchItem
         {
             PermanentId = document.Get(nameof(PermanentId)),
             Title = document.Get(nameof(Title)),
+            Headings = headings,
             Tags = tags,
             Body = document.Get(nameof(Body))
         };

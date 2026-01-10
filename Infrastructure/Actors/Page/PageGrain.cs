@@ -191,7 +191,8 @@ public class PageGrain(
         {
             PermanentId = _page!.Id,
             Title = _page.Title,
-            Body = _page.Content.Value,
+            Body = _page.Content.GetSearchBody(),
+            Headings = _page.Content.GetHeaders().ToList(),
             Tags = _page.Content.FrontMatter.Tags?.ToList() ?? []
         });
     }
@@ -202,7 +203,8 @@ public class PageGrain(
         {
             PermanentId = _page!.Id,
             Title = _page.Title,
-            Body = _page.Content.Value,
+            Body = _page.Content.GetSearchBody(),
+            Headings = _page.Content.GetHeaders().ToList(),
             Tags = _page.Content.FrontMatter.Tags?.ToList() ?? []
         });
     }

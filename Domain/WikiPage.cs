@@ -47,6 +47,33 @@ public record WikiContent
         return "Untitled";
     }
 
+    public IReadOnlyCollection<string> GetHeaders()
+    {
+        string pattern = @"<h[2-6]\b[^>]*>(.*?)<\/h[2-6]>";
+
+        MatchCollection matches = Regex.Matches(_html, pattern);
+        return matches.Select(m => m.Groups[1].Value).ToList();
+    }
+
+    public string GetSearchBody()
+    {
+        var html = _html;
+
+        // Strip h1 tag
+        html = Regex.Replace(html, @"<h1\b[^>]*>.*?<\/h1>", string.Empty);
+
+        // Strip h2-h6 tags
+        html = Regex.Replace(html, @"<h[2-6]\b[^>]*>.*?<\/h[2-6]>", string.Empty);
+
+        // Strip pre tags
+        html = Regex.Replace(html, @"<pre\b[^>]*>.*?<\/pre>", string.Empty, RegexOptions.Singleline);
+
+        // Remove all remaining HTML tags
+        html = Regex.Replace(html, @"<.*?>", string.Empty);
+
+        return html.Trim();
+    }
+
     public IReadOnlyCollection<string> GetOutgoingLinks()
     {
         if (string.IsNullOrWhiteSpace(Value))
